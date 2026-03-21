@@ -1,0 +1,102 @@
+/**
+ * TGP Theme Variables
+ * Color palette: Black · Gold · White (with blended tones)
+ *
+ * $baseTheme: "HumHub";
+ */
+
+$baseTheme: "HumHub";
+
+// ── Core palette ──────────────────────────────────────────────────────────────
+$gold:        #C9A84C;   // rich gold
+$gold-light:  #E2C97E;   // soft gold / champagne
+$gold-dark:   #8B6914;   // deep gold / bronze
+$jet:         #1A1A1A;   // near-black
+$charcoal:    #2C2C2C;   // dark surface
+$smoke:       #3D3D3D;   // mid-dark surface
+$ivory:       #F5F0E8;   // warm white / parchment
+$off-white:   #FAF8F4;   // near-white
+
+// ── Bootstrap semantic colors ─────────────────────────────────────────────────
+$primary:   $charcoal   !default;   // dark charcoal — main brand color
+$secondary: $smoke      !default;   // mid-dark for secondary elements
+$accent:    $gold       !default;   // gold accent throughout the UI
+$info:      #5B9BD5     !default;   // muted steel-blue (readable on dark)
+$success:   #6AAB5E     !default;
+$warning:   $gold-light !default;
+$danger:    #C0392B     !default;
+$light:     $ivory      !default;
+$dark:      $jet        !default;
+
+// ── Body & links ──────────────────────────────────────────────────────────────
+$body-color:          #D4C9B0 !default;   // warm light-grey text on dark bg
+$body-bg:             $jet    !default;   // page background — deep black
+$link-color:          $gold   !default;
+$link-hover-color:    $gold-light !default;
+$input-border-color:  $smoke  !default;
+$input-bg:            $charcoal !default;
+
+// ── Text colors ───────────────────────────────────────────────────────────────
+$text-color-main:       #E8E0CC !default;   // primary readable text
+$text-color-default:    #D4C9B0 !default;
+$text-color-secondary:  #A89870 !default;   // muted gold-grey
+$text-color-highlight:  #F5F0E8 !default;   // near-white for emphasis
+$text-color-soft:       #9E9070 !default;
+$text-color-soft2:      #6E6450 !default;
+$text-color-soft3:      #4E4438 !default;
+
+// ── Background colors ─────────────────────────────────────────────────────────
+$background-color-main:           $charcoal  !default;   // card / panel bg
+$background-color-secondary:      $smoke     !default;   // tab bg, hover bg
+$background-color-page:           $jet       !default;   // page bg
+$background-color-highlight:      rgba($gold, 0.18) !default;
+$background-color-highlight-soft: rgba($gold, 0.08) !default;
+$background3:                     #444444    !default;
+$background4:                     #5A5040    !default;
+
+// ── Alert boxes ───────────────────────────────────────────────────────────────
+$background-color-success:  #1E2B1A !default;
+$text-color-success:        #6AAB5E !default;
+$border-color-success:      #4A7A40 !default;
+
+$background-color-warning:  #2B2410 !default;
+$text-color-warning:        $gold-light !default;
+$border-color-warning:      $gold-dark  !default;
+
+$background-color-danger:   #2B1010 !default;
+$text-color-danger:         #E07070 !default;
+$border-color-danger:       #C0392B !default;
+
+// ── Dark-mode variants (same palette — already dark-first) ────────────────────
+$body-color-dark:                   #E8E0CC !default;
+$body-bg-dark:                      #0D0D0D !default;
+$input-border-color-dark:           #3A3020 !default;
+$input-bg-dark:                     #1A1A1A !default;
+
+$text-color-main-dark:              #E8E0CC !default;
+$text-color-default-dark:           #D4C9B0 !default;
+$text-color-secondary-dark:         #A89870 !default;
+$text-color-highlight-dark:         #F5F0E8 !default;
+$text-color-soft-dark:              #9E9070 !default;
+$text-color-soft2-dark:             #7A6E54 !default;
+$text-color-soft3-dark:             #5A5040 !default;
+
+$background-color-main-dark:        #1E1E1E !default;
+$background-color-secondary-dark:   #2A2A2A !default;
+$background-color-page-dark:        #0D0D0D !default;
+$background-color-highlight-dark:   rgba($gold, 0.15) !default;
+$background-color-highlight-soft-dark: rgba($gold, 0.07) !default;
+$background3-dark:                  #383020 !default;
+$background4-dark:                  #4A4030 !default;
+
+$background-color-success-dark:     #1A2A16 !default;
+$text-color-success-dark:           #6AAB5E !default;
+$border-color-success-dark:         #4A7A40 !default;
+
+$background-color-warning-dark:     #2A2010 !default;
+$text-color-warning-dark:           $gold-light !default;
+$border-color-warning-dark:         $gold-dark  !default;
+
+$background-color-danger-dark:      #2A1010 !default;
+$text-color-danger-dark:            #E07070 !default;
+$border-color-danger-dark:          #C0392B !default;
