@@ -1,13 +1,45 @@
 /**
- * Define or overwrite your theme variables here.
- *
- * Check for @humhub/static/less/variables.less file for all available variables.
- * 
- * You can also access your variables within your view files by calling Yii::$app->view->theme->variable('myVariable');
- *
- * You can disable the import of humhub theme components by using variables of the format @prev-{component} e.g.:
- * This will prevent comment.less component from beeing imported.
- * e.g.:
- * @prev-comment: true;
- *
+ * Black, Gold & White theme variables
+ * Primary palette: #0d0d0d (black), #c9a84c (gold), #ffffff (white)
 **/
+
+// Core brand colors
+@primary:                   #c9a84c;   // gold
+@default:                   #2a2a2a;   // dark grey (default elements)
+@info:                      #d4b96a;   // lighter gold for info
+@success:                   #6abf69;   // muted green (kept readable)
+@warning:                   #e0a030;   // amber-gold warning
+@danger:                    #c0392b;   // deep red danger
+@link:                      #c9a84c;   // gold links
+
+// Text colors
+@text-color-main:           #e8e8e8;   // near-white main text
+@text-color-default:        #d0d0d0;
+@text-color-secondary:      #999999;
+@text-color-highlight:      #ffffff;
+@text-color-soft:           #bbbbbb;
+@text-color-soft2:          #777777;
+@text-color-soft3:          #555555;
+@text-color-contrast:       #0d0d0d;   // black text on gold
+
+// Backgrounds
+@background-color-main:     #1a1a1a;   // main content bg
+@background-color-secondary:#141414;   // slightly darker secondary
+@background-color-page:     #0d0d0d;   // page/body bg (pure black)
+@background-color-highlight:#2e2510;   // gold-tinted highlight
+@background-color-highlight-soft: #1f1a0d;
+@background3:               #2a2a2a;
+@background4:               #3a3a3a;
+
+// Status backgrounds
+@background-color-success:  #0f1f0f;
+@text-color-success:        #6abf69;
+@border-color-success:      #4a9e49;
+
+@background-color-warning:  #1f1500;
+@text-color-warning:        #e0a030;
+@border-color-warning:      #c9a84c;
+
+@background-color-danger:   #1f0a0a;
+@text-color-danger:         #e05555;
+@border-color-danger:       #c0392b;
