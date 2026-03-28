@@ -240,6 +240,7 @@ class Election extends ContentActiveRecord
         }
 
         $this->postResultsToWall();
+        OfficerAssignment::populateFromElection($this);
         $this->updateAttributes(['results_posted' => 1]);
     }
 
