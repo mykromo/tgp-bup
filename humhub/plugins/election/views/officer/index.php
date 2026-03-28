@@ -31,14 +31,16 @@ $this->pageTitle = Yii::t('ElectionModule.base', 'Chapter Officers');
                     <div class="col-sm-6 col-md-4" style="margin-bottom:20px">
                         <div class="panel panel-default" style="text-align:center; padding:15px; min-height:220px">
                             <?php if ($user): ?>
-                                <img src="<?= $user->getProfileImage()->getUrl() ?>"
-                                     class="img-circle" width="80" height="80"
-                                     alt="<?= Html::encode($user->displayName) ?>"
-                                     style="margin-bottom:10px">
-                                <h4 style="margin:5px 0"><?= Html::encode($user->displayName) ?></h4>
-                                <?php if ($user->profile->title): ?>
-                                    <p class="text-muted" style="margin:0; font-size:12px"><?= Html::encode($user->profile->title) ?></p>
-                                <?php endif; ?>
+                                <a href="<?= $user->getUrl() ?>" style="color:inherit; text-decoration:none">
+                                    <img src="<?= $user->getProfileImage()->getUrl() ?>"
+                                         class="img-circle" width="80" height="80"
+                                         alt="<?= Html::encode($user->displayName) ?>"
+                                         style="margin-bottom:10px">
+                                    <h4 style="margin:5px 0"><?= Html::encode($user->displayName) ?></h4>
+                                    <?php if ($user->profile->title): ?>
+                                        <p class="text-muted" style="margin:0; font-size:12px"><?= Html::encode($user->profile->title) ?></p>
+                                    <?php endif; ?>
+                                </a>
                             <?php else: ?>
                                 <div style="width:80px;height:80px;border-radius:50%;background:#eee;margin:0 auto 10px;line-height:80px">
                                     <i class="fa fa-user" style="font-size:36px;color:#ccc"></i>
@@ -48,7 +50,7 @@ $this->pageTitle = Yii::t('ElectionModule.base', 'Chapter Officers');
 
                             <hr style="margin:10px 0">
                             <span class="label label-primary" style="font-size:13px">
-                                <i class="fa fa-star"></i> <?= Html::encode($pos->title) ?>
+                                <?= Html::encode($pos->title) ?>
                             </span>
 
                             <?php if ($canManage): ?>

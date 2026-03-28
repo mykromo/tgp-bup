@@ -63,7 +63,7 @@ $this->pageTitle = Html::encode($election->title);
         <?php foreach ($results as $positionKey => $positionData): ?>
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <strong><i class="fa fa-star"></i> <?= Html::encode($positionData['label']) ?></strong>
+                    <strong><?= Html::encode($positionData['label']) ?></strong>
                     <?php $hasVoted = $election->hasVoted($userId, $positionKey); ?>
                     <?php if ($hasVoted): ?>
                         <span class="label label-info pull-right">
@@ -142,6 +142,12 @@ $this->pageTitle = Html::encode($election->title);
                 <i class="fa fa-arrow-left"></i> <?= Yii::t('ElectionModule.base', 'Back to Elections') ?>
             </a>
             <?php if ($canManage && $election->isOpen()): ?>
+                <a href="<?= $contentContainer->createUrl('/election/election/cancel', ['id' => $election->id]) ?>"
+                   class="btn btn-danger pull-right" style="margin-left:5px"
+                   data-method="post"
+                   data-confirm="<?= Yii::t('ElectionModule.base', 'Are you sure you want to cancel this election? This cannot be undone and will not affect current officers.') ?>">
+                    <i class="fa fa-ban"></i> <?= Yii::t('ElectionModule.base', 'Cancel Election') ?>
+                </a>
                 <a href="<?= $contentContainer->createUrl('/election/election/close', ['id' => $election->id]) ?>"
                    class="btn btn-warning pull-right"
                    data-method="post"
@@ -153,6 +159,10 @@ $this->pageTitle = Html::encode($election->title);
                    class="btn btn-info pull-right" data-method="post">
                     <i class="fa fa-unlock"></i> <?= Yii::t('ElectionModule.base', 'Reopen Election') ?>
                 </a>
+            <?php elseif ($canManage && $phase === 'cancelled'): ?>
+                <span class="label label-warning pull-right" style="margin-top:5px; font-size:13px">
+                    <i class="fa fa-ban"></i> <?= Yii::t('ElectionModule.base', 'This election has been cancelled') ?>
+                </span>
             <?php endif; ?>
         </div>
     </div>

@@ -167,6 +167,18 @@ class ElectionController extends ContentContainerController
         return $this->redirect($this->contentContainer->createUrl('/election/election/view', ['id' => $id]));
     }
 
+    public function actionCancel($id)
+    {
+        if (!$this->contentContainer->permissionManager->can(CreateElection::class)) {
+            throw new ForbiddenHttpException();
+        }
+        $this->forcePostRequest();
+        $election = $this->findElection($id);
+        $election->status = Election::STATUS_CANCELLED;
+        $election->save(false);
+        return $this->redirect($this->contentContainer->createUrl('/election/election/view', ['id' => $id]));
+    }
+
     public function actionReopen($id)
     {
         if (!$this->contentContainer->permissionManager->can(CreateElection::class)) {

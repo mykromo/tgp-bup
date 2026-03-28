@@ -33,11 +33,13 @@ class Election extends ContentActiveRecord
 {
     const STATUS_OPEN = 0;
     const STATUS_CLOSED = 1;
+    const STATUS_CANCELLED = 2;
 
     const PHASE_CANDIDACY = 'candidacy';
     const PHASE_VOTING = 'voting';
     const PHASE_COMPLETED = 'completed';
     const PHASE_CLOSED = 'closed';
+    const PHASE_CANCELLED = 'cancelled';
 
     public $wallEntryClass = WallEntry::class;
     public $moduleId = 'election';
@@ -86,6 +88,9 @@ class Election extends ContentActiveRecord
 
     public function getPhase(): string
     {
+        if ($this->status === self::STATUS_CANCELLED) {
+            return self::PHASE_CANCELLED;
+        }
         if ($this->status === self::STATUS_CLOSED) {
             return self::PHASE_CLOSED;
         }
@@ -114,6 +119,11 @@ class Election extends ContentActiveRecord
         return in_array($this->getPhase(), [self::PHASE_COMPLETED, self::PHASE_CLOSED]);
     }
 
+    public function isCancelled(): bool
+    {
+        return $this->getPhase() === self::PHASE_CANCELLED;
+    }
+
     public function isOpen(): bool
     {
         return in_array($this->getPhase(), [self::PHASE_CANDIDACY, self::PHASE_VOTING]);
@@ -126,6 +136,7 @@ class Election extends ContentActiveRecord
             self::PHASE_VOTING => Yii::t('ElectionModule.base', 'Voting'),
             self::PHASE_COMPLETED => Yii::t('ElectionModule.base', 'Completed'),
             self::PHASE_CLOSED => Yii::t('ElectionModule.base', 'Closed'),
+            self::PHASE_CANCELLED => Yii::t('ElectionModule.base', 'Cancelled'),
         };
     }
 
@@ -136,6 +147,7 @@ class Election extends ContentActiveRecord
             self::PHASE_VOTING => 'label-success',
             self::PHASE_COMPLETED => 'label-default',
             self::PHASE_CLOSED => 'label-danger',
+            self::PHASE_CANCELLED => 'label-warning',
         };
     }
 
