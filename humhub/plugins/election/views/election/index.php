@@ -39,8 +39,9 @@ $this->pageTitle = Yii::t('ElectionModule.base', 'Officer Elections');
                     <thead>
                         <tr>
                             <th><?= Yii::t('ElectionModule.base', 'Title') ?></th>
-                            <th><?= Yii::t('ElectionModule.base', 'Status') ?></th>
-                            <th><?= Yii::t('ElectionModule.base', 'Created') ?></th>
+                            <th><?= Yii::t('ElectionModule.base', 'Phase') ?></th>
+                            <th><?= Yii::t('ElectionModule.base', 'Candidacy Deadline') ?></th>
+                            <th><?= Yii::t('ElectionModule.base', 'Voting Deadline') ?></th>
                             <th></th>
                         </tr>
                     </thead>
@@ -49,17 +50,12 @@ $this->pageTitle = Yii::t('ElectionModule.base', 'Officer Elections');
                             <tr>
                                 <td><?= Html::encode($election->title) ?></td>
                                 <td>
-                                    <span class="label label-<?= $election->isOpen() ? 'success' : 'default' ?>">
-                                        <?php if ($election->isExpired()): ?>
-                                            <?= Yii::t('ElectionModule.base', 'Expired') ?>
-                                        <?php elseif (!$election->isOpen()): ?>
-                                            <?= Yii::t('ElectionModule.base', 'Closed') ?>
-                                        <?php else: ?>
-                                            <?= Yii::t('ElectionModule.base', 'Open') ?>
-                                        <?php endif; ?>
+                                    <span class="label <?= $election->getPhaseBadgeClass() ?>">
+                                        <?= $election->getPhaseLabel() ?>
                                     </span>
                                 </td>
-                                <td><?= Yii::$app->formatter->asDatetime($election->created_at) ?></td>
+                                <td><?= $election->candidacy_expires_at ? Yii::$app->formatter->asDatetime($election->candidacy_expires_at) : '—' ?></td>
+                                <td><?= $election->voting_expires_at ? Yii::$app->formatter->asDatetime($election->voting_expires_at) : '—' ?></td>
                                 <td>
                                     <a href="<?= $contentContainer->createUrl('/election/election/view', ['id' => $election->id]) ?>"
                                        class="btn btn-default btn-sm">

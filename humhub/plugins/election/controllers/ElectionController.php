@@ -8,9 +8,7 @@ use humhub\modules\election\models\ElectionCandidate;
 use humhub\modules\election\models\ElectionPosition;
 use humhub\modules\election\models\ElectionVote;
 use humhub\modules\election\permissions\CreateElection;
-use humhub\modules\space\models\Membership;
 use humhub\modules\space\models\Space;
-use humhub\modules\user\models\User;
 use Yii;
 use yii\web\ForbiddenHttpException;
 use yii\web\HttpException;
@@ -26,6 +24,11 @@ class ElectionController extends ContentContainerController
             ->contentContainer($this->contentContainer)
             ->orderBy(['election.created_at' => SORT_DESC])
             ->all();
+
+        // Check all elections for completed ones that need results posted
+        foreach ($elections as $election) {
+            $election->checkAndPostResults();
+        }
 
         return $this->render('index', [
             'elections' => $elections,
@@ -56,34 +59,30 @@ class ElectionController extends ContentContainerController
     public function actionView($id)
     {
         $election = $this->findElection($id);
-        $userId = Yii::$app->user->id;
-        $results = $election->getResults();
-        $isMember = $this->contentContainer->isMember();
+
+        // Auto-post results to wall when election completes
+        $election->checkAndPostResults();
 
         return $this->render('view', [
             'election' => $election,
-            'results' => $results,
-            'userId' => $userId,
-            'isMember' => $isMember,
+            'results' => $election->getResults(),
+            'userId' => Yii::$app->user->id,
+            'isMember' => $this->contentContainer->isMember(),
             'contentContainer' => $this->contentContainer,
             'canManage' => $this->contentContainer->permissionManager->can(CreateElection::class),
         ]);
     }
 
-    /**
-     * File candidacy — any chapter member can file for any open position.
-     * The form is auto-filled with the member's profile data.
-     */
     public function actionFileCandidacy($electionId)
     {
         $election = $this->findElection($electionId);
 
-        if (!$election->isOpen()) {
-            throw new HttpException(403, Yii::t('ElectionModule.base', 'This election is closed or has expired.'));
+        if (!$election->isCandidacyOpen()) {
+            throw new HttpException(403, Yii::t('ElectionModule.base', 'Filing of candidacy is no longer open.'));
         }
 
         if (!$this->contentContainer->isMember()) {
-            throw new ForbiddenHttpException(Yii::t('ElectionModule.base', 'You must be a chapter member to file candidacy.'));
+            throw new ForbiddenHttpException();
         }
 
         $user = Yii::$app->user->getIdentity();
@@ -94,7 +93,6 @@ class ElectionController extends ContentContainerController
         $candidate->user_id = $user->id;
 
         if ($candidate->load(Yii::$app->request->post()) && $candidate->validate()) {
-            // Check if already filed for this position
             if ($election->hasFiled($user->id, $candidate->position)) {
                 $candidate->addError('position', Yii::t('ElectionModule.base', 'You have already filed candidacy for this position.'));
             } else {
@@ -125,8 +123,8 @@ class ElectionController extends ContentContainerController
 
         $election = $this->findElection($electionId);
 
-        if (!$election->isOpen()) {
-            throw new HttpException(403, Yii::t('ElectionModule.base', 'This election is closed or has expired.'));
+        if (!$election->isVotingOpen()) {
+            throw new HttpException(403, Yii::t('ElectionModule.base', 'Voting is not open.'));
         }
 
         if (!$this->contentContainer->isMember()) {
@@ -163,11 +161,9 @@ class ElectionController extends ContentContainerController
         if (!$this->contentContainer->permissionManager->can(CreateElection::class)) {
             throw new ForbiddenHttpException();
         }
-
         $election = $this->findElection($id);
         $election->status = Election::STATUS_CLOSED;
         $election->save(false);
-
         return $this->redirect($this->contentContainer->createUrl('/election/election/view', ['id' => $id]));
     }
 
@@ -176,11 +172,9 @@ class ElectionController extends ContentContainerController
         if (!$this->contentContainer->permissionManager->can(CreateElection::class)) {
             throw new ForbiddenHttpException();
         }
-
         $election = $this->findElection($id);
         $election->status = Election::STATUS_OPEN;
         $election->save(false);
-
         return $this->redirect($this->contentContainer->createUrl('/election/election/view', ['id' => $id]));
     }
 
@@ -190,11 +184,9 @@ class ElectionController extends ContentContainerController
             ->contentContainer($this->contentContainer)
             ->where(['election.id' => $id])
             ->one();
-
         if (!$election) {
             throw new NotFoundHttpException();
         }
-
         return $election;
     }
 }

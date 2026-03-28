@@ -10,34 +10,34 @@ use yii\db\ActiveQuery;
 use yii\helpers\Url;
 
 /**
+ * Election lifecycle:
+ *   1. CANDIDACY  — members file candidacy (until candidacy_expires_at)
+ *   2. VOTING     — candidacy closed, members vote (until voting_expires_at)
+ *   3. COMPLETED  — voting closed, winners determined
+ *   Admin can also manually close at any time (status = STATUS_CLOSED).
+ *
  * @property int $id
  * @property string $title
  * @property string $description
  * @property int $status
- * @property string $expires_at
+ * @property string $expires_at (legacy, unused)
+ * @property string $candidacy_expires_at
+ * @property string $voting_expires_at
+ * @property int $results_posted
  * @property string $created_at
  * @property int $created_by
  * @property string $updated_at
  * @property int $updated_by
- *
- * @property ElectionCandidate[] $candidates
- * @property ElectionVote[] $votes
  */
 class Election extends ContentActiveRecord
 {
     const STATUS_OPEN = 0;
     const STATUS_CLOSED = 1;
 
-    /**
-     * @deprecated Use ElectionPosition::getForSpace() for dynamic positions
-     */
-    const POSITIONS = [
-        'grand_triskelion' => 'Grand Triskelion',
-        'deputy_grand_triskelion' => 'Deputy Grand Triskelion',
-        'master_wielder_of_the_whip' => 'Master Wielder of the Whip',
-        'master_keeper_of_the_scroll' => 'Master Keeper of the Scroll',
-        'master_keeper_of_the_chest' => 'Master Keeper of the Chest',
-    ];
+    const PHASE_CANDIDACY = 'candidacy';
+    const PHASE_VOTING = 'voting';
+    const PHASE_COMPLETED = 'completed';
+    const PHASE_CLOSED = 'closed';
 
     public $wallEntryClass = WallEntry::class;
     public $moduleId = 'election';
@@ -51,11 +51,11 @@ class Election extends ContentActiveRecord
     public function rules()
     {
         return [
-            [['title', 'expires_at'], 'required'],
+            [['title', 'candidacy_expires_at', 'voting_expires_at'], 'required'],
             [['title'], 'string', 'max' => 255],
             [['description'], 'string'],
             [['status'], 'integer'],
-            [['expires_at'], 'safe'],
+            [['candidacy_expires_at', 'voting_expires_at', 'expires_at'], 'safe'],
         ];
     }
 
@@ -64,22 +64,82 @@ class Election extends ContentActiveRecord
         return [
             'title' => Yii::t('ElectionModule.base', 'Title'),
             'description' => Yii::t('ElectionModule.base', 'Description'),
-            'status' => Yii::t('ElectionModule.base', 'Status'),
-            'expires_at' => Yii::t('ElectionModule.base', 'Expiration Date'),
+            'candidacy_expires_at' => Yii::t('ElectionModule.base', 'Filing of Candidacy Deadline'),
+            'voting_expires_at' => Yii::t('ElectionModule.base', 'Voting Deadline'),
         ];
     }
 
     public function beforeSave($insert)
     {
-        // Normalize datetime-local input (2026-03-28T18:00) to MySQL format
-        if ($this->expires_at) {
-            $ts = strtotime($this->expires_at);
-            if ($ts !== false) {
-                $this->expires_at = date('Y-m-d H:i:s', $ts);
+        foreach (['candidacy_expires_at', 'voting_expires_at', 'expires_at'] as $attr) {
+            if ($this->$attr) {
+                $ts = strtotime($this->$attr);
+                if ($ts !== false) {
+                    $this->$attr = date('Y-m-d H:i:s', $ts);
+                }
             }
         }
         return parent::beforeSave($insert);
     }
+
+    // ── Phase logic ──
+
+    public function getPhase(): string
+    {
+        if ($this->status === self::STATUS_CLOSED) {
+            return self::PHASE_CLOSED;
+        }
+        $now = time();
+        if ($now < strtotime($this->candidacy_expires_at)) {
+            return self::PHASE_CANDIDACY;
+        }
+        if ($now < strtotime($this->voting_expires_at)) {
+            return self::PHASE_VOTING;
+        }
+        return self::PHASE_COMPLETED;
+    }
+
+    public function isCandidacyOpen(): bool
+    {
+        return $this->getPhase() === self::PHASE_CANDIDACY;
+    }
+
+    public function isVotingOpen(): bool
+    {
+        return $this->getPhase() === self::PHASE_VOTING;
+    }
+
+    public function isCompleted(): bool
+    {
+        return in_array($this->getPhase(), [self::PHASE_COMPLETED, self::PHASE_CLOSED]);
+    }
+
+    public function isOpen(): bool
+    {
+        return in_array($this->getPhase(), [self::PHASE_CANDIDACY, self::PHASE_VOTING]);
+    }
+
+    public function getPhaseLabel(): string
+    {
+        return match ($this->getPhase()) {
+            self::PHASE_CANDIDACY => Yii::t('ElectionModule.base', 'Filing of Candidacy'),
+            self::PHASE_VOTING => Yii::t('ElectionModule.base', 'Voting'),
+            self::PHASE_COMPLETED => Yii::t('ElectionModule.base', 'Completed'),
+            self::PHASE_CLOSED => Yii::t('ElectionModule.base', 'Closed'),
+        };
+    }
+
+    public function getPhaseBadgeClass(): string
+    {
+        return match ($this->getPhase()) {
+            self::PHASE_CANDIDACY => 'label-info',
+            self::PHASE_VOTING => 'label-success',
+            self::PHASE_COMPLETED => 'label-default',
+            self::PHASE_CLOSED => 'label-danger',
+        };
+    }
+
+    // ── Relations ──
 
     public function getCandidates(): ActiveQuery
     {
@@ -91,23 +151,7 @@ class Election extends ContentActiveRecord
         return $this->hasMany(ElectionVote::class, ['election_id' => 'id']);
     }
 
-    public function isOpen(): bool
-    {
-        if ($this->status === self::STATUS_CLOSED) {
-            return false;
-        }
-
-        if ($this->expires_at && strtotime($this->expires_at) <= time()) {
-            return false;
-        }
-
-        return true;
-    }
-
-    public function isExpired(): bool
-    {
-        return $this->expires_at && strtotime($this->expires_at) <= time();
-    }
+    // ── Helpers ──
 
     public function hasVoted(int $userId, string $position): bool
     {
@@ -116,11 +160,16 @@ class Election extends ContentActiveRecord
             ->exists();
     }
 
+    public function hasFiled(int $userId, string $position): bool
+    {
+        return ElectionCandidate::find()
+            ->where(['election_id' => $this->id, 'user_id' => $userId, 'position' => $position])
+            ->exists();
+    }
+
     public function getVoteCount(int $candidateId): int
     {
-        return (int) ElectionVote::find()
-            ->where(['candidate_id' => $candidateId])
-            ->count();
+        return (int) ElectionVote::find()->where(['candidate_id' => $candidateId])->count();
     }
 
     public function getCandidatesForPosition(string $position): array
@@ -130,32 +179,11 @@ class Election extends ContentActiveRecord
             ->all();
     }
 
-    public function getContentName()
-    {
-        return Yii::t('ElectionModule.base', 'Officer Election');
-    }
-
-    public function getContentDescription()
-    {
-        return $this->title;
-    }
-
-    public function getIcon()
-    {
-        return 'fa-check-square-o';
-    }
-
-    public function getUrl()
-    {
-        return Url::to(['/election/election/view', 'id' => $this->id, 'contentContainer' => $this->content->container]);
-    }
-
     public function getResults(): array
     {
         $spaceId = $this->content->container->id;
         $positions = ElectionPosition::getForSpace($spaceId);
         $results = [];
-
         foreach ($positions as $position) {
             $key = (string) $position->id;
             $candidates = $this->getCandidatesForPosition($key);
@@ -177,12 +205,93 @@ class Election extends ContentActiveRecord
     }
 
     /**
-     * Check if a user has already filed candidacy for a position in this election.
+     * Returns the winners (top vote-getter per position).
      */
-    public function hasFiled(int $userId, string $position): bool
+    public function getWinners(): array
     {
-        return ElectionCandidate::find()
-            ->where(['election_id' => $this->id, 'user_id' => $userId, 'position' => $position])
-            ->exists();
+        $results = $this->getResults();
+        $winners = [];
+        foreach ($results as $positionKey => $data) {
+            if (!empty($data['candidates']) && $data['candidates'][0]['votes'] > 0) {
+                $winners[] = [
+                    'position' => $data['label'],
+                    'user' => $data['candidates'][0]['user'],
+                    'votes' => $data['candidates'][0]['votes'],
+                ];
+            }
+        }
+        return $winners;
+    }
+
+    // ── Auto-post results ──
+
+    /**
+     * Checks if the election just completed and posts results to the space wall.
+     * Safe to call multiple times — only posts once.
+     */
+    public function checkAndPostResults(): void
+    {
+        if ($this->results_posted) {
+            return;
+        }
+
+        if ($this->getPhase() !== self::PHASE_COMPLETED) {
+            return;
+        }
+
+        $this->postResultsToWall();
+        $this->updateAttributes(['results_posted' => 1]);
+    }
+
+    /**
+     * Creates a Post on the space wall announcing the elected officers.
+     */
+    private function postResultsToWall(): void
+    {
+        $winners = $this->getWinners();
+        if (empty($winners)) {
+            return;
+        }
+
+        $lines = [];
+        $lines[] = '🏆 **' . Yii::t('ElectionModule.base', 'Election Results: {title}', ['title' => $this->title]) . '**';
+        $lines[] = '';
+        $lines[] = Yii::t('ElectionModule.base', 'The following officers have been elected:');
+        $lines[] = '';
+
+        foreach ($winners as $w) {
+            $lines[] = '⭐ **' . $w['position'] . '** — ' . $w['user']->displayName . ' (' . $w['votes'] . ' ' . Yii::t('ElectionModule.base', 'votes') . ')';
+        }
+
+        $lines[] = '';
+        $lines[] = Yii::t('ElectionModule.base', 'Congratulations to all newly elected officers!');
+
+        $message = implode("\n", $lines);
+
+        $post = new \humhub\modules\post\models\Post($this->content->container);
+        $post->message = $message;
+        $post->save();
+    }
+
+    // ── Content interface ──
+
+    public function getContentName()
+    {
+        return Yii::t('ElectionModule.base', 'Officer Election');
+    }
+
+    public function getContentDescription()
+    {
+        return $this->title;
+    }
+
+    public function getIcon()
+    {
+        return 'fa-check-square-o';
+    }
+
+    public function getUrl()
+    {
+        return Url::to(['/election/election/view', 'id' => $this->id, 'contentContainer' => $this->content->container]);
     }
 }

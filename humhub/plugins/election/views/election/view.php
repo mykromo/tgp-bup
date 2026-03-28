@@ -11,52 +11,55 @@ use humhub\modules\content\components\ContentContainerActiveRecord;
 /* @var $contentContainer ContentContainerActiveRecord */
 /* @var $canManage bool */
 
+$phase = $election->getPhase();
 $this->pageTitle = Html::encode($election->title);
 ?>
 
 <div class="panel panel-default">
     <div class="panel-heading">
         <strong><?= Html::encode($election->title) ?></strong>
-        <span class="label label-<?= $election->isOpen() ? 'success' : 'default' ?> pull-right" style="margin-top:2px">
-            <?php if ($election->isExpired()): ?>
-                <?= Yii::t('ElectionModule.base', 'Expired') ?>
-            <?php elseif (!$election->isOpen()): ?>
-                <?= Yii::t('ElectionModule.base', 'Closed') ?>
-            <?php else: ?>
-                <?= Yii::t('ElectionModule.base', 'Open') ?>
-            <?php endif; ?>
+        <span class="label <?= $election->getPhaseBadgeClass() ?> pull-right" style="margin-top:2px">
+            <?= $election->getPhaseLabel() ?>
         </span>
     </div>
     <div class="panel-body">
         <?php if ($election->description): ?>
             <p class="text-muted"><?= Html::encode($election->description) ?></p>
         <?php endif; ?>
-        <?php if ($election->expires_at): ?>
-            <p>
-                <i class="fa fa-clock-o"></i>
-                <?php if ($election->isExpired()): ?>
-                    <span class="text-danger">
-                        <?= Yii::t('ElectionModule.base', 'Expired on {date}', ['date' => Yii::$app->formatter->asDatetime($election->expires_at)]) ?>
-                    </span>
-                <?php else: ?>
-                    <span class="text-muted">
-                        <?= Yii::t('ElectionModule.base', 'Expires on {date}', ['date' => Yii::$app->formatter->asDatetime($election->expires_at)]) ?>
-                    </span>
-                <?php endif; ?>
-            </p>
-        <?php endif; ?>
 
-        <?php if ($election->isOpen() && $isMember): ?>
+        <!-- Timeline -->
+        <div class="well well-sm">
+            <div class="row">
+                <div class="col-sm-6">
+                    <i class="fa fa-pencil-square-o"></i>
+                    <strong><?= Yii::t('ElectionModule.base', 'Candidacy Deadline:') ?></strong><br>
+                    <?= Yii::$app->formatter->asDatetime($election->candidacy_expires_at) ?>
+                    <?php if ($election->isCandidacyOpen()): ?>
+                        <span class="label label-info"><?= Yii::t('ElectionModule.base', 'Open Now') ?></span>
+                    <?php endif; ?>
+                </div>
+                <div class="col-sm-6">
+                    <i class="fa fa-check-square-o"></i>
+                    <strong><?= Yii::t('ElectionModule.base', 'Voting Deadline:') ?></strong><br>
+                    <?= Yii::$app->formatter->asDatetime($election->voting_expires_at) ?>
+                    <?php if ($election->isVotingOpen()): ?>
+                        <span class="label label-success"><?= Yii::t('ElectionModule.base', 'Open Now') ?></span>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
+        <!-- File Candidacy button (only during candidacy phase) -->
+        <?php if ($election->isCandidacyOpen() && $isMember): ?>
             <a href="<?= $contentContainer->createUrl('/election/election/file-candidacy', ['electionId' => $election->id]) ?>"
-               class="btn btn-info">
-                <i class="fa fa-hand-paper-o"></i> <?= Yii::t('ElectionModule.base', 'File Candidacy') ?>
+               class="btn btn-info btn-lg btn-block" style="margin-bottom:15px">
+                <i class="fa fa-hand-paper-o"></i> <?= Yii::t('ElectionModule.base', 'File Your Candidacy') ?>
             </a>
         <?php endif; ?>
 
-        <?php if ($election->description || $election->expires_at || ($election->isOpen() && $isMember)): ?>
-            <hr>
-        <?php endif; ?>
+        <hr>
 
+        <!-- Positions & Candidates -->
         <?php foreach ($results as $positionKey => $positionData): ?>
             <div class="panel panel-default">
                 <div class="panel-heading">
@@ -70,7 +73,11 @@ $this->pageTitle = Html::encode($election->title);
                 </div>
                 <div class="panel-body">
                     <?php if (empty($positionData['candidates'])): ?>
-                        <p class="text-muted"><?= Yii::t('ElectionModule.base', 'No candidates for this position yet.') ?></p>
+                        <p class="text-muted">
+                            <?= $election->isCandidacyOpen()
+                                ? Yii::t('ElectionModule.base', 'No candidates yet. Be the first to file!')
+                                : Yii::t('ElectionModule.base', 'No candidates for this position.') ?>
+                        </p>
                     <?php else: ?>
                         <div class="table-responsive">
                             <table class="table">
@@ -78,28 +85,35 @@ $this->pageTitle = Html::encode($election->title);
                                     <tr>
                                         <th><?= Yii::t('ElectionModule.base', 'Candidate') ?></th>
                                         <th><?= Yii::t('ElectionModule.base', 'Statement') ?></th>
-                                        <th class="text-center"><?= Yii::t('ElectionModule.base', 'Votes') ?></th>
-                                        <?php if ($election->isOpen() && !$hasVoted && $isMember): ?>
+                                        <?php if ($election->isVotingOpen() || $election->isCompleted()): ?>
+                                            <th class="text-center"><?= Yii::t('ElectionModule.base', 'Votes') ?></th>
+                                        <?php endif; ?>
+                                        <?php if ($election->isVotingOpen() && !$hasVoted && $isMember): ?>
                                             <th class="text-center"><?= Yii::t('ElectionModule.base', 'Action') ?></th>
                                         <?php endif; ?>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($positionData['candidates'] as $entry): ?>
-                                        <tr>
+                                    <?php foreach ($positionData['candidates'] as $i => $entry): ?>
+                                        <tr<?= ($election->isCompleted() && $i === 0 && $entry['votes'] > 0) ? ' class="success"' : '' ?>>
                                             <td style="white-space:nowrap">
                                                 <img src="<?= $entry['user']->getProfileImage()->getUrl() ?>"
                                                      class="img-rounded" width="24" height="24"
                                                      alt="<?= Html::encode($entry['user']->displayName) ?>">
                                                 <?= Html::encode($entry['user']->displayName) ?>
+                                                <?php if ($election->isCompleted() && $i === 0 && $entry['votes'] > 0): ?>
+                                                    <i class="fa fa-trophy text-warning"></i>
+                                                <?php endif; ?>
                                             </td>
                                             <td class="text-muted">
                                                 <?= $entry['candidate']->statement ? Html::encode($entry['candidate']->statement) : '—' ?>
                                             </td>
-                                            <td class="text-center">
-                                                <span class="badge"><?= $entry['votes'] ?></span>
-                                            </td>
-                                            <?php if ($election->isOpen() && !$hasVoted && $isMember): ?>
+                                            <?php if ($election->isVotingOpen() || $election->isCompleted()): ?>
+                                                <td class="text-center">
+                                                    <span class="badge"><?= $entry['votes'] ?></span>
+                                                </td>
+                                            <?php endif; ?>
+                                            <?php if ($election->isVotingOpen() && !$hasVoted && $isMember): ?>
                                                 <td class="text-center">
                                                     <?= Html::beginForm($contentContainer->createUrl('/election/election/vote'), 'post') ?>
                                                         <?= Html::hiddenInput('electionId', $election->id) ?>
@@ -127,21 +141,18 @@ $this->pageTitle = Html::encode($election->title);
             <a href="<?= $contentContainer->createUrl('/election/election/index') ?>" class="btn btn-default">
                 <i class="fa fa-arrow-left"></i> <?= Yii::t('ElectionModule.base', 'Back to Elections') ?>
             </a>
-            <?php if ($canManage): ?>
-                <?php if ($election->isOpen()): ?>
-                    <a href="<?= $contentContainer->createUrl('/election/election/close', ['id' => $election->id]) ?>"
-                       class="btn btn-warning pull-right"
-                       data-method="post"
-                       data-confirm="<?= Yii::t('ElectionModule.base', 'Are you sure you want to close this election?') ?>">
-                        <i class="fa fa-lock"></i> <?= Yii::t('ElectionModule.base', 'Close Election') ?>
-                    </a>
-                <?php else: ?>
-                    <a href="<?= $contentContainer->createUrl('/election/election/reopen', ['id' => $election->id]) ?>"
-                       class="btn btn-info pull-right"
-                       data-method="post">
-                        <i class="fa fa-unlock"></i> <?= Yii::t('ElectionModule.base', 'Reopen Election') ?>
-                    </a>
-                <?php endif; ?>
+            <?php if ($canManage && $election->isOpen()): ?>
+                <a href="<?= $contentContainer->createUrl('/election/election/close', ['id' => $election->id]) ?>"
+                   class="btn btn-warning pull-right"
+                   data-method="post"
+                   data-confirm="<?= Yii::t('ElectionModule.base', 'Are you sure you want to close this election?') ?>">
+                    <i class="fa fa-lock"></i> <?= Yii::t('ElectionModule.base', 'Close Election') ?>
+                </a>
+            <?php elseif ($canManage && $phase === 'closed'): ?>
+                <a href="<?= $contentContainer->createUrl('/election/election/reopen', ['id' => $election->id]) ?>"
+                   class="btn btn-info pull-right" data-method="post">
+                    <i class="fa fa-unlock"></i> <?= Yii::t('ElectionModule.base', 'Reopen Election') ?>
+                </a>
             <?php endif; ?>
         </div>
     </div>

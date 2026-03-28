@@ -42,6 +42,13 @@ $this->pageTitle = Yii::t('ElectionModule.base', 'File Candidacy');
             </div>
         </div>
 
+        <div class="alert alert-info">
+            <i class="fa fa-clock-o"></i>
+            <?= Yii::t('ElectionModule.base', 'Filing of candidacy closes on {date}. Voting will open automatically after that.', [
+                'date' => '<strong>' . Yii::$app->formatter->asDatetime($election->candidacy_expires_at) . '</strong>',
+            ]) ?>
+        </div>
+
         <?php $form = ActiveForm::begin(['id' => 'candidacy-form']); ?>
 
         <?= $form->field($candidate, 'position')->dropDownList($positions, [
