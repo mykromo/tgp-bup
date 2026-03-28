@@ -55,7 +55,7 @@ class Election extends ContentActiveRecord
             [['title'], 'string', 'max' => 255],
             [['description'], 'string'],
             [['status'], 'integer'],
-            [['expires_at'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+            [['expires_at'], 'safe'],
         ];
     }
 
@@ -67,6 +67,18 @@ class Election extends ContentActiveRecord
             'status' => Yii::t('ElectionModule.base', 'Status'),
             'expires_at' => Yii::t('ElectionModule.base', 'Expiration Date'),
         ];
+    }
+
+    public function beforeSave($insert)
+    {
+        // Normalize datetime-local input (2026-03-28T18:00) to MySQL format
+        if ($this->expires_at) {
+            $ts = strtotime($this->expires_at);
+            if ($ts !== false) {
+                $this->expires_at = date('Y-m-d H:i:s', $ts);
+            }
+        }
+        return parent::beforeSave($insert);
     }
 
     public function getCandidates(): ActiveQuery
