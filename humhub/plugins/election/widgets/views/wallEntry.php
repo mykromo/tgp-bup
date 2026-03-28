@@ -15,13 +15,8 @@ use humhub\libs\Html;
         <p class="text-muted"><?= Html::encode($election->description) ?></p>
     <?php endif; ?>
     <p>
-        <span class="label label-<?= $election->isOpen() ? 'success' : 'default' ?>">
-            <?= $election->isOpen()
-                ? Yii::t('ElectionModule.base', 'Open')
-                : Yii::t('ElectionModule.base', 'Closed') ?>
-        </span>
-        <span class="text-muted">
-            <?= Yii::t('ElectionModule.base', '{count} positions', ['count' => count(Election::POSITIONS)]) ?>
+        <span class="label <?= $election->getPhaseBadgeClass() ?>">
+            <?= $election->getPhaseLabel() ?>
         </span>
     </p>
 </div>
