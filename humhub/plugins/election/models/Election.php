@@ -253,6 +253,13 @@ class Election extends ContentActiveRecord
 
         $this->postResultsToWall();
         OfficerAssignment::populateFromElection($this);
+
+        // Create activity in the chapter's activity stream
+        \humhub\modules\election\activities\ElectionCompleted::instance()
+            ->from(Yii::$app->user->getIdentity())
+            ->about($this)
+            ->save();
+
         $this->updateAttributes(['results_posted' => 1]);
     }
 
