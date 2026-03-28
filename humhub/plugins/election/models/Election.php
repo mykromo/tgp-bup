@@ -253,22 +253,35 @@ class Election extends ContentActiveRecord
 
         $this->postResultsToWall();
         OfficerAssignment::populateFromElection($this);
+        $this->createCompletionActivity();
 
-        // Create activity in the chapter's activity stream
+        $this->updateAttributes(['results_posted' => 1]);
+    }
+
+    /**
+     * Creates an Activity record directly so it appears in "Latest Activities".
+     */
+    private function createCompletionActivity(): void
+    {
         try {
-            $originator = Yii::$app->user->getIdentity();
-            if ($originator) {
-                \humhub\modules\election\activities\ElectionCompleted::instance()
-                    ->from($originator)
-                    ->about($this)
-                    ->container($this->content->container)
-                    ->save();
+            $container = $this->content->container;
+            $createdBy = Yii::$app->user->isGuest ? $this->created_by : Yii::$app->user->id;
+
+            $activity = new \humhub\modules\activity\models\Activity($container, [
+                'visibility' => \humhub\modules\content\models\Content::VISIBILITY_PUBLIC,
+            ]);
+            $activity->class = \humhub\modules\election\activities\ElectionCompleted::class;
+            $activity->module = 'election';
+            $activity->setPolymorphicRelation($this);
+            $activity->content->created_by = $createdBy;
+            $activity->content->visibility = \humhub\modules\content\models\Content::VISIBILITY_PUBLIC;
+
+            if (!$activity->save()) {
+                Yii::error('Election activity save failed: ' . json_encode($activity->getErrors()), 'election');
             }
         } catch (\Throwable $e) {
             Yii::error('Election activity creation failed: ' . $e->getMessage(), 'election');
         }
-
-        $this->updateAttributes(['results_posted' => 1]);
     }
 
     /**
