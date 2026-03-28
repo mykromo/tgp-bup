@@ -255,10 +255,18 @@ class Election extends ContentActiveRecord
         OfficerAssignment::populateFromElection($this);
 
         // Create activity in the chapter's activity stream
-        \humhub\modules\election\activities\ElectionCompleted::instance()
-            ->from(Yii::$app->user->getIdentity())
-            ->about($this)
-            ->save();
+        try {
+            $originator = Yii::$app->user->getIdentity();
+            if ($originator) {
+                \humhub\modules\election\activities\ElectionCompleted::instance()
+                    ->from($originator)
+                    ->about($this)
+                    ->container($this->content->container)
+                    ->save();
+            }
+        } catch (\Throwable $e) {
+            Yii::error('Election activity creation failed: ' . $e->getMessage(), 'election');
+        }
 
         $this->updateAttributes(['results_posted' => 1]);
     }
