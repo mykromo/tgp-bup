@@ -1,5 +1,0 @@
-<?php
-
-return [
-    'Spaces' => 'Chapters',
-];
