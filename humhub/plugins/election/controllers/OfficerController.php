@@ -75,6 +75,23 @@ class OfficerController extends ContentContainerController
         ]);
     }
 
+    public function actionVacate($positionId)
+    {
+        if (!$this->contentContainer->permissionManager->can(CreateElection::class)) {
+            throw new ForbiddenHttpException();
+        }
+        $this->forcePostRequest();
+
+        $spaceId = $this->contentContainer->id;
+        $record = OfficerAssignment::findOne(['space_id' => $spaceId, 'position_id' => $positionId]);
+        if ($record) {
+            $record->delete();
+        }
+
+        $this->view->saved();
+        return $this->redirect($this->contentContainer->createUrl('/election/officer/index'));
+    }
+
     private function getSpaceMembers(): array
     {
         return User::find()
