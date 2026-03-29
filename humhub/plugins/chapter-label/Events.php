@@ -3,13 +3,20 @@
 namespace humhub\modules\chapterlabel;
 
 use Yii;
+use yii\base\ActionEvent;
 use yii\base\BaseObject;
-use yii\base\Event;
 
 class Events extends BaseObject
 {
-    public static function onInit(Event $event)
+    private static bool $applied = false;
+
+    public static function onBeforeAction(ActionEvent $event): void
     {
+        if (self::$applied) {
+            return;
+        }
+        self::$applied = true;
+
         $module = Yii::$app->getModule('chapter-label');
         if ($module === null) {
             return;
