@@ -40,6 +40,7 @@ class PositionController extends ContentContainerController
         $model->space_id = $this->contentContainer->id;
         $model->is_default = 0;
         $model->is_active = 1;
+        $model->sort_order = 0;
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             $this->view->saved();

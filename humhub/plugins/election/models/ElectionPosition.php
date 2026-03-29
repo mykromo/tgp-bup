@@ -29,6 +29,7 @@ class ElectionPosition extends ActiveRecord
         return [
             [['space_id', 'title'], 'required'],
             [['space_id', 'sort_order'], 'integer'],
+            [['sort_order'], 'default', 'value' => 0],
             [['title'], 'string', 'max' => 255],
             [['is_default', 'is_active'], 'boolean'],
         ];
