@@ -1,0 +1,12 @@
+{
+    "id": "election",
+    "name": "Officer Election",
+    "description": "Allows chapter members to vote for chapter officers via polls",
+    "keywords": [
+        "election",
+        "vote",
+        "poll",
+        "officers"
+    ],
+    "version": "1.0.0"
+}

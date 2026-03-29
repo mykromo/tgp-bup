@@ -1,0 +1,19 @@
+{
+    "id": "online-users",
+    "name": "Online users",
+    "description": "The module displays online users directly on your dashboard in a snippet.",
+    "keywords": ["online", "users", "snippet"],
+    "version": "1.0.0",
+    "humhub": {
+        "minVersion": "1.16"
+    },
+    "homepage": "https://github.com/humhub/virus-scanner",
+    "authors": [
+        {
+            "name": "Lucas Bartholemy"
+        }
+    ],
+    "screenshots": [
+        "resources/screenshot1.png"
+    ]
+}

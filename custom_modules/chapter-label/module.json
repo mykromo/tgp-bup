@@ -1,0 +1,7 @@
+{
+    "id": "chapter-label",
+    "name": "Chapter Label",
+    "description": "Renames all Space/Spaces labels to Chapter/Chapters system-wide",
+    "keywords": ["label", "rename", "chapter", "space"],
+    "version": "1.0.0"
+}
