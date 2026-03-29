@@ -235,6 +235,58 @@ class Election extends ContentActiveRecord
         return $winners;
     }
 
+    // ── Calendar integration ──
+
+    /**
+     * Creates two calendar events: one for the candidacy period, one for voting.
+     * Requires the Calendar module to be enabled on the space.
+     */
+    public function createCalendarEvents(): void
+    {
+        if (!class_exists('humhub\modules\calendar\models\CalendarEntry')) {
+            return;
+        }
+
+        $container = $this->content->container;
+
+        // Check if calendar module is enabled on this space
+        if (!$container->isModuleEnabled('calendar')) {
+            return;
+        }
+
+        $dbFormat = 'Y-m-d H:i:s';
+
+        try {
+            // Candidacy period event
+            $candidacy = new \humhub\modules\calendar\models\CalendarEntry($container);
+            $candidacy->title = Yii::t('ElectionModule.base', 'Filing of Candidacy: {title}', ['title' => $this->title]);
+            $candidacy->description = Yii::t('ElectionModule.base', 'Chapter members can file their candidacy for officer positions during this period.');
+            $candidacy->start_datetime = $this->created_at;
+            $candidacy->end_datetime = date($dbFormat, strtotime($this->candidacy_expires_at));
+            $candidacy->all_day = 0;
+            $candidacy->color = '#5bc0de'; // info blue
+            $candidacy->content->visibility = \humhub\modules\content\models\Content::VISIBILITY_PUBLIC;
+            if (!$candidacy->save()) {
+                Yii::error('Election candidacy calendar event failed: ' . json_encode($candidacy->getErrors()), 'election');
+            }
+
+            // Voting period event
+            $voting = new \humhub\modules\calendar\models\CalendarEntry($container);
+            $voting->title = Yii::t('ElectionModule.base', 'Voting: {title}', ['title' => $this->title]);
+            $voting->description = Yii::t('ElectionModule.base', 'Chapter members can cast their votes for officer positions during this period.');
+            $voting->start_datetime = date($dbFormat, strtotime($this->candidacy_expires_at));
+            $voting->end_datetime = date($dbFormat, strtotime($this->voting_expires_at));
+            $voting->all_day = 0;
+            $voting->color = '#5cb85c'; // success green
+            $voting->content->visibility = \humhub\modules\content\models\Content::VISIBILITY_PUBLIC;
+            if (!$voting->save()) {
+                Yii::error('Election voting calendar event failed: ' . json_encode($voting->getErrors()), 'election');
+            }
+        } catch (\Throwable $e) {
+            Yii::error('Election calendar event creation failed: ' . $e->getMessage(), 'election');
+        }
+    }
+
     // ── Auto-post results ──
 
     /**

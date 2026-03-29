@@ -47,6 +47,7 @@ class ElectionController extends ContentContainerController
 
         if ($election->load(Yii::$app->request->post()) && $election->validate()) {
             $election->save();
+            $election->createCalendarEvents();
             return $this->redirect($this->contentContainer->createUrl('/election/election/view', ['id' => $election->id]));
         }
 
