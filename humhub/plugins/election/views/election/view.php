@@ -32,7 +32,9 @@ $this->pageTitle = Html::encode($election->title);
             <div class="row">
                 <div class="col-sm-6">
                     <i class="fa fa-pencil-square-o"></i>
-                    <strong><?= Yii::t('ElectionModule.base', 'Candidacy Deadline:') ?></strong><br>
+                    <strong><?= Yii::t('ElectionModule.base', 'Filing of Candidacy:') ?></strong><br>
+                    <?= Yii::$app->formatter->asDatetime($election->candidacy_start_at) ?>
+                    &mdash;
                     <?= Yii::$app->formatter->asDatetime($election->candidacy_expires_at) ?>
                     <?php if ($election->isCandidacyOpen()): ?>
                         <span class="label label-info"><?= Yii::t('ElectionModule.base', 'Open Now') ?></span>
@@ -40,7 +42,9 @@ $this->pageTitle = Html::encode($election->title);
                 </div>
                 <div class="col-sm-6">
                     <i class="fa fa-check-square-o"></i>
-                    <strong><?= Yii::t('ElectionModule.base', 'Voting Deadline:') ?></strong><br>
+                    <strong><?= Yii::t('ElectionModule.base', 'Voting:') ?></strong><br>
+                    <?= Yii::$app->formatter->asDatetime($election->voting_start_at) ?>
+                    &mdash;
                     <?= Yii::$app->formatter->asDatetime($election->voting_expires_at) ?>
                     <?php if ($election->isVotingOpen()): ?>
                         <span class="label label-success"><?= Yii::t('ElectionModule.base', 'Open Now') ?></span>

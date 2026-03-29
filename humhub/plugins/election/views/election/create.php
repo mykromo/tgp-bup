@@ -22,16 +22,34 @@ $this->pageTitle = Yii::t('ElectionModule.base', 'Create Election');
         <?= $form->field($election, 'description')->textarea(['rows' => 3]) ?>
 
         <div class="well">
-            <h5><i class="fa fa-calendar"></i> <?= Yii::t('ElectionModule.base', 'Election Timeline') ?></h5>
+            <h5><i class="fa fa-pencil-square-o"></i>
+                <?= Yii::t('ElectionModule.base', 'Filing of Candidacy Schedule') ?>
+            </h5>
+            <div class="row">
+                <div class="col-sm-6">
+                    <?= $form->field($election, 'candidacy_start_at')->input('datetime-local') ?>
+                </div>
+                <div class="col-sm-6">
+                    <?= $form->field($election, 'candidacy_expires_at')->input('datetime-local') ?>
+                </div>
+            </div>
+        </div>
+
+        <div class="well">
+            <h5><i class="fa fa-check-square-o"></i>
+                <?= Yii::t('ElectionModule.base', 'Voting Schedule') ?>
+            </h5>
             <p class="help-block">
-                <?= Yii::t('ElectionModule.base', 'Phase 1: Members file candidacy until the deadline. Phase 2: Voting opens automatically after candidacy closes and runs until the voting deadline.') ?>
+                <?= Yii::t('ElectionModule.base', 'Candidacy must come before voting. They can be on the same date as long as the times do not overlap.') ?>
             </p>
-
-            <?= $form->field($election, 'candidacy_expires_at')->input('datetime-local')
-                ->label(Yii::t('ElectionModule.base', 'Filing of Candidacy Deadline')) ?>
-
-            <?= $form->field($election, 'voting_expires_at')->input('datetime-local')
-                ->label(Yii::t('ElectionModule.base', 'Voting Deadline')) ?>
+            <div class="row">
+                <div class="col-sm-6">
+                    <?= $form->field($election, 'voting_start_at')->input('datetime-local') ?>
+                </div>
+                <div class="col-sm-6">
+                    <?= $form->field($election, 'voting_expires_at')->input('datetime-local') ?>
+                </div>
+            </div>
         </div>
 
         <hr>

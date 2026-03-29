@@ -44,8 +44,9 @@ $this->pageTitle = Yii::t('ElectionModule.base', 'File Candidacy');
 
         <div class="alert alert-info">
             <i class="fa fa-clock-o"></i>
-            <?= Yii::t('ElectionModule.base', 'Filing of candidacy closes on {date}. Voting will open automatically after that.', [
-                'date' => '<strong>' . Yii::$app->formatter->asDatetime($election->candidacy_expires_at) . '</strong>',
+            <?= Yii::t('ElectionModule.base', 'Filing of candidacy is open from {start} to {end}. Voting will open automatically after that.', [
+                'start' => '<strong>' . Yii::$app->formatter->asDatetime($election->candidacy_start_at) . '</strong>',
+                'end' => '<strong>' . Yii::$app->formatter->asDatetime($election->candidacy_expires_at) . '</strong>',
             ]) ?>
         </div>
 

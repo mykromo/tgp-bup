@@ -21,7 +21,9 @@ use yii\helpers\Url;
  * @property string $description
  * @property int $status
  * @property string $expires_at (legacy, unused)
+ * @property string $candidacy_start_at
  * @property string $candidacy_expires_at
+ * @property string $voting_start_at
  * @property string $voting_expires_at
  * @property int $results_posted
  * @property string $created_at
@@ -53,12 +55,53 @@ class Election extends ContentActiveRecord
     public function rules()
     {
         return [
-            [['title', 'candidacy_expires_at', 'voting_expires_at'], 'required'],
+            [['title', 'candidacy_start_at', 'candidacy_expires_at', 'voting_start_at', 'voting_expires_at'], 'required'],
             [['title'], 'string', 'max' => 255],
             [['description'], 'string'],
             [['status'], 'integer'],
-            [['candidacy_expires_at', 'voting_expires_at', 'expires_at'], 'safe'],
+            [['candidacy_start_at', 'candidacy_expires_at', 'voting_start_at', 'voting_expires_at', 'expires_at'], 'safe'],
+            [['candidacy_expires_at'], 'validateCandidacyRange'],
+            [['voting_start_at'], 'validateVotingAfterCandidacy'],
+            [['voting_expires_at'], 'validateVotingRange'],
         ];
+    }
+
+    /**
+     * Candidacy end must be after candidacy start.
+     */
+    public function validateCandidacyRange($attribute)
+    {
+        if ($this->candidacy_start_at && $this->candidacy_expires_at) {
+            if (strtotime($this->candidacy_expires_at) <= strtotime($this->candidacy_start_at)) {
+                $this->addError($attribute, Yii::t('ElectionModule.base', 'Candidacy end must be after candidacy start.'));
+            }
+        }
+    }
+
+    /**
+     * Voting must start at or after candidacy ends (same date allowed if time doesn't overlap).
+     */
+    public function validateVotingAfterCandidacy($attribute)
+    {
+        if ($this->candidacy_expires_at && $this->voting_start_at) {
+            $candidacyEnd = strtotime($this->candidacy_expires_at);
+            $votingStart = strtotime($this->voting_start_at);
+            if ($votingStart < $candidacyEnd) {
+                $this->addError($attribute, Yii::t('ElectionModule.base', 'Voting start must be at or after candidacy end. They can be on the same date but the times must not overlap.'));
+            }
+        }
+    }
+
+    /**
+     * Voting end must be after voting start.
+     */
+    public function validateVotingRange($attribute)
+    {
+        if ($this->voting_start_at && $this->voting_expires_at) {
+            if (strtotime($this->voting_expires_at) <= strtotime($this->voting_start_at)) {
+                $this->addError($attribute, Yii::t('ElectionModule.base', 'Voting end must be after voting start.'));
+            }
+        }
     }
 
     public function attributeLabels()
@@ -66,14 +109,17 @@ class Election extends ContentActiveRecord
         return [
             'title' => Yii::t('ElectionModule.base', 'Title'),
             'description' => Yii::t('ElectionModule.base', 'Description'),
-            'candidacy_expires_at' => Yii::t('ElectionModule.base', 'Filing of Candidacy Deadline'),
-            'voting_expires_at' => Yii::t('ElectionModule.base', 'Voting Deadline'),
+            'candidacy_start_at' => Yii::t('ElectionModule.base', 'Candidacy Start Date'),
+            'candidacy_expires_at' => Yii::t('ElectionModule.base', 'Candidacy End Date'),
+            'voting_start_at' => Yii::t('ElectionModule.base', 'Voting Start Date'),
+            'voting_expires_at' => Yii::t('ElectionModule.base', 'Voting End Date'),
         ];
     }
 
     public function beforeSave($insert)
     {
-        foreach (['candidacy_expires_at', 'voting_expires_at', 'expires_at'] as $attr) {
+        // Normalize all date inputs to MySQL datetime format (preserve time)
+        foreach (['candidacy_start_at', 'candidacy_expires_at', 'voting_start_at', 'voting_expires_at', 'expires_at'] as $attr) {
             if ($this->$attr) {
                 $ts = strtotime($this->$attr);
                 if ($ts !== false) {
@@ -95,13 +141,25 @@ class Election extends ContentActiveRecord
             return self::PHASE_CLOSED;
         }
         $now = time();
-        if ($now < strtotime($this->candidacy_expires_at)) {
+        $candidacyStart = strtotime($this->candidacy_start_at);
+        $candidacyEnd = strtotime($this->candidacy_expires_at);
+        $votingStart = strtotime($this->voting_start_at);
+        $votingEnd = strtotime($this->voting_expires_at);
+
+        if ($now < $candidacyStart) {
+            return self::PHASE_CANDIDACY; // upcoming, treat as candidacy
+        }
+        if ($now >= $candidacyStart && $now < $candidacyEnd) {
             return self::PHASE_CANDIDACY;
         }
-        if ($now < strtotime($this->voting_expires_at)) {
+        if ($now >= $votingStart && $now < $votingEnd) {
             return self::PHASE_VOTING;
         }
-        return self::PHASE_COMPLETED;
+        if ($now >= $votingEnd) {
+            return self::PHASE_COMPLETED;
+        }
+        // Between candidacy end and voting start (gap)
+        return self::PHASE_VOTING;
     }
 
     public function isCandidacyOpen(): bool
@@ -256,13 +314,13 @@ class Election extends ContentActiveRecord
         $dbFormat = 'Y-m-d H:i:s';
 
         try {
-            // Candidacy period: from creation to candidacy deadline
+            // Candidacy period: candidacy_start_at → candidacy_expires_at
             $candidacy = new \humhub\modules\calendar\models\CalendarEntry($container);
             $candidacy->title = Yii::t('ElectionModule.base', 'Filing of Candidacy: {title}', ['title' => $this->title]);
             $candidacy->description = Yii::t('ElectionModule.base', 'Chapter members can file their candidacy for officer positions during this period.');
-            $candidacy->start_datetime = $this->created_at;
-            $candidacy->end_datetime = date($dbFormat, strtotime($this->candidacy_expires_at));
-            $candidacy->all_day = 0;
+            $candidacy->start_datetime = date('Y-m-d 00:00:00', strtotime($this->candidacy_start_at));
+            $candidacy->end_datetime = date('Y-m-d 23:59:00', strtotime($this->candidacy_expires_at));
+            $candidacy->all_day = 1;
             $candidacy->color = '#5bc0de';
             $candidacy->content->visibility = \humhub\modules\content\models\Content::VISIBILITY_PUBLIC;
             if ($candidacy->save()) {
@@ -271,14 +329,13 @@ class Election extends ContentActiveRecord
                 Yii::error('Election candidacy calendar event failed: ' . json_encode($candidacy->getErrors()), 'election');
             }
 
-            // Voting period: starts 1 minute after candidacy ends, runs to voting deadline
-            $votingStart = strtotime($this->candidacy_expires_at) + 60;
+            // Voting period: voting_start_at → voting_expires_at
             $voting = new \humhub\modules\calendar\models\CalendarEntry($container);
             $voting->title = Yii::t('ElectionModule.base', 'Voting: {title}', ['title' => $this->title]);
             $voting->description = Yii::t('ElectionModule.base', 'Chapter members can cast their votes for officer positions during this period.');
-            $voting->start_datetime = date($dbFormat, $votingStart);
-            $voting->end_datetime = date($dbFormat, strtotime($this->voting_expires_at));
-            $voting->all_day = 0;
+            $voting->start_datetime = date('Y-m-d 00:00:00', strtotime($this->voting_start_at));
+            $voting->end_datetime = date('Y-m-d 23:59:00', strtotime($this->voting_expires_at));
+            $voting->all_day = 1;
             $voting->color = '#5cb85c';
             $voting->content->visibility = \humhub\modules\content\models\Content::VISIBILITY_PUBLIC;
             if ($voting->save()) {

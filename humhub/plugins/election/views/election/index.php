@@ -40,8 +40,8 @@ $this->pageTitle = Yii::t('ElectionModule.base', 'Officer Elections');
                         <tr>
                             <th><?= Yii::t('ElectionModule.base', 'Title') ?></th>
                             <th><?= Yii::t('ElectionModule.base', 'Phase') ?></th>
-                            <th><?= Yii::t('ElectionModule.base', 'Candidacy Deadline') ?></th>
-                            <th><?= Yii::t('ElectionModule.base', 'Voting Deadline') ?></th>
+                            <th><?= Yii::t('ElectionModule.base', 'Candidacy') ?></th>
+                            <th><?= Yii::t('ElectionModule.base', 'Voting') ?></th>
                             <th></th>
                         </tr>
                     </thead>
@@ -54,8 +54,8 @@ $this->pageTitle = Yii::t('ElectionModule.base', 'Officer Elections');
                                         <?= $election->getPhaseLabel() ?>
                                     </span>
                                 </td>
-                                <td><?= $election->candidacy_expires_at ? Yii::$app->formatter->asDatetime($election->candidacy_expires_at) : '—' ?></td>
-                                <td><?= $election->voting_expires_at ? Yii::$app->formatter->asDatetime($election->voting_expires_at) : '—' ?></td>
+                                <td><?= $election->candidacy_start_at ? Yii::$app->formatter->asDate($election->candidacy_start_at) . ' — ' . Yii::$app->formatter->asDate($election->candidacy_expires_at) : '—' ?></td>
+                                <td><?= $election->voting_start_at ? Yii::$app->formatter->asDate($election->voting_start_at) . ' — ' . Yii::$app->formatter->asDate($election->voting_expires_at) : '—' ?></td>
                                 <td>
                                     <a href="<?= $contentContainer->createUrl('/election/election/view', ['id' => $election->id]) ?>"
                                        class="btn btn-default btn-sm">
