@@ -4,13 +4,14 @@ namespace humhub\modules\election\models;
 
 use humhub\components\ActiveRecord;
 use Yii;
-use yii\db\ActiveQuery;
 
 /**
  * @property int $id
  * @property int $space_id
  * @property string $title
  * @property int $sort_order
+ * @property int $is_default
+ * @property int $is_active
  * @property string $created_at
  * @property int $created_by
  * @property string $updated_at
@@ -29,6 +30,7 @@ class ElectionPosition extends ActiveRecord
             [['space_id', 'title'], 'required'],
             [['space_id', 'sort_order'], 'integer'],
             [['title'], 'string', 'max' => 255],
+            [['is_default', 'is_active'], 'boolean'],
         ];
     }
 
@@ -37,11 +39,12 @@ class ElectionPosition extends ActiveRecord
         return [
             'title' => Yii::t('ElectionModule.base', 'Position Title'),
             'sort_order' => Yii::t('ElectionModule.base', 'Sort Order'),
+            'is_active' => Yii::t('ElectionModule.base', 'Active'),
         ];
     }
 
     /**
-     * Returns all positions for a given space, creating defaults if none exist.
+     * Returns ALL positions for a space (including disabled), creating defaults if none exist.
      */
     public static function getForSpace(int $spaceId): array
     {
@@ -58,8 +61,14 @@ class ElectionPosition extends ActiveRecord
     }
 
     /**
-     * Seeds the default officer positions for a space.
+     * Returns only ACTIVE positions for a space.
      */
+    public static function getActiveForSpace(int $spaceId): array
+    {
+        $all = static::getForSpace($spaceId);
+        return array_filter($all, fn($p) => (int) $p->is_active === 1);
+    }
+
     public static function seedDefaults(int $spaceId): array
     {
         $defaults = [
@@ -76,6 +85,8 @@ class ElectionPosition extends ActiveRecord
             $pos->space_id = $spaceId;
             $pos->title = $title;
             $pos->sort_order = $order;
+            $pos->is_default = 1;
+            $pos->is_active = 1;
             $pos->save(false);
             $result[] = $pos;
         }
@@ -84,15 +95,25 @@ class ElectionPosition extends ActiveRecord
     }
 
     /**
-     * Returns positions as id => title map for dropdowns.
+     * Returns active positions as id => title map (for candidacy/voting dropdowns).
      */
     public static function getPositionMap(int $spaceId): array
     {
-        $positions = static::getForSpace($spaceId);
+        $positions = static::getActiveForSpace($spaceId);
         $map = [];
         foreach ($positions as $pos) {
             $map[$pos->id] = $pos->title;
         }
         return $map;
+    }
+
+    public function isDefault(): bool
+    {
+        return (int) $this->is_default === 1;
+    }
+
+    public function isActive(): bool
+    {
+        return (int) $this->is_active === 1;
     }
 }

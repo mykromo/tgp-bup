@@ -194,7 +194,7 @@ class Election extends ContentActiveRecord
     public function getResults(): array
     {
         $spaceId = $this->content->container->id;
-        $positions = ElectionPosition::getForSpace($spaceId);
+        $positions = ElectionPosition::getActiveForSpace($spaceId);
         $results = [];
         foreach ($positions as $position) {
             $key = (string) $position->id;
