@@ -3,27 +3,30 @@
 namespace humhub\modules\chapterlabel;
 
 use Yii;
-use yii\base\ActionEvent;
 use yii\base\BaseObject;
 
 class Events extends BaseObject
 {
-    private static bool $applied = false;
+    private static $applied = false;
 
-    public static function onBeforeAction(ActionEvent $event): void
+    public static function onBeforeAction($event)
     {
         if (self::$applied) {
             return;
         }
         self::$applied = true;
 
-        $module = Yii::$app->getModule('chapter-label');
-        if ($module === null) {
-            return;
-        }
+        try {
+            $module = Yii::$app->getModule('chapter-label');
+            if ($module === null) {
+                return;
+            }
 
-        Yii::$app->i18n->messageOverwritePath = $module->getBasePath() . '/messages';
-        Yii::$app->i18n->beforeTranslateCallback = [static::class, 'rewrite'];
+            Yii::$app->i18n->messageOverwritePath = $module->getBasePath() . '/messages';
+            Yii::$app->i18n->beforeTranslateCallback = [static::class, 'rewrite'];
+        } catch (\Throwable $e) {
+            // Fail silently
+        }
     }
 
     public static function rewrite($category, $message, $params, $language)
@@ -35,21 +38,12 @@ class Events extends BaseObject
             return [$category, $message, $params, $language];
         }
 
-        static $replacements = [
-            ['Spaces', 'Chapters'],
-            ['spaces', 'chapters'],
-            ['SPACES', 'CHAPTERS'],
-            ['Space',  'Chapter'],
-            ['space',  'chapter'],
-            ['SPACE',  'CHAPTER'],
-        ];
+        $out = str_replace(
+            ['Spaces', 'spaces', 'SPACES', 'Space', 'space', 'SPACE'],
+            ['Chapters', 'chapters', 'CHAPTERS', 'Chapter', 'chapter', 'CHAPTER'],
+            $message
+        );
 
-        $out = $message;
-        foreach ($replacements as [$s, $r]) {
-            if (strpos($out, $s) !== false) {
-                $out = str_replace($s, $r, $out);
-            }
-        }
         return [$category, $out, $params, $language];
     }
 }
