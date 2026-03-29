@@ -92,6 +92,52 @@ class OfficerController extends ContentContainerController
         return $this->redirect($this->contentContainer->createUrl('/election/officer/index'));
     }
 
+    public function actionTogglePosition($positionId)
+    {
+        if (!$this->contentContainer->permissionManager->can(CreateElection::class)) {
+            throw new ForbiddenHttpException();
+        }
+        $this->forcePostRequest();
+
+        $model = ElectionPosition::findOne(['id' => $positionId, 'space_id' => $this->contentContainer->id]);
+        if (!$model) {
+            throw new NotFoundHttpException();
+        }
+
+        $model->is_active = $model->isActive() ? 0 : 1;
+        $model->save(false);
+
+        $this->view->saved();
+        return $this->redirect($this->contentContainer->createUrl('/election/officer/index'));
+    }
+
+    public function actionDeletePosition($positionId)
+    {
+        if (!$this->contentContainer->permissionManager->can(CreateElection::class)) {
+            throw new ForbiddenHttpException();
+        }
+        $this->forcePostRequest();
+
+        $model = ElectionPosition::findOne(['id' => $positionId, 'space_id' => $this->contentContainer->id]);
+        if (!$model) {
+            throw new NotFoundHttpException();
+        }
+
+        if ($model->isDefault()) {
+            throw new \yii\web\HttpException(403, Yii::t('ElectionModule.base', 'Default positions cannot be deleted.'));
+        }
+
+        // Remove officer assignment if exists
+        $assignment = OfficerAssignment::findOne(['space_id' => $this->contentContainer->id, 'position_id' => $positionId]);
+        if ($assignment) {
+            $assignment->delete();
+        }
+
+        $model->delete();
+        $this->view->saved();
+        return $this->redirect($this->contentContainer->createUrl('/election/officer/index'));
+    }
+
     private function getSpaceMembers(): array
     {
         return User::find()
