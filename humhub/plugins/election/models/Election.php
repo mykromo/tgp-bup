@@ -239,7 +239,7 @@ class Election extends ContentActiveRecord
 
     /**
      * Creates two calendar events: one for the candidacy period, one for voting.
-     * Requires the Calendar module to be enabled on the space.
+     * Stores the calendar entry IDs so they can be deleted on cancel.
      */
     public function createCalendarEvents(): void
     {
@@ -249,7 +249,6 @@ class Election extends ContentActiveRecord
 
         $container = $this->content->container;
 
-        // Check if calendar module is enabled on this space
         if (!$container->isModuleEnabled('calendar')) {
             return;
         }
@@ -257,33 +256,65 @@ class Election extends ContentActiveRecord
         $dbFormat = 'Y-m-d H:i:s';
 
         try {
-            // Candidacy period event
+            // Candidacy period: from creation to candidacy deadline
             $candidacy = new \humhub\modules\calendar\models\CalendarEntry($container);
             $candidacy->title = Yii::t('ElectionModule.base', 'Filing of Candidacy: {title}', ['title' => $this->title]);
             $candidacy->description = Yii::t('ElectionModule.base', 'Chapter members can file their candidacy for officer positions during this period.');
             $candidacy->start_datetime = $this->created_at;
             $candidacy->end_datetime = date($dbFormat, strtotime($this->candidacy_expires_at));
             $candidacy->all_day = 0;
-            $candidacy->color = '#5bc0de'; // info blue
+            $candidacy->color = '#5bc0de';
             $candidacy->content->visibility = \humhub\modules\content\models\Content::VISIBILITY_PUBLIC;
-            if (!$candidacy->save()) {
+            if ($candidacy->save()) {
+                $this->updateAttributes(['candidacy_calendar_id' => $candidacy->id]);
+            } else {
                 Yii::error('Election candidacy calendar event failed: ' . json_encode($candidacy->getErrors()), 'election');
             }
 
-            // Voting period event
+            // Voting period: starts 1 minute after candidacy ends, runs to voting deadline
+            $votingStart = strtotime($this->candidacy_expires_at) + 60;
             $voting = new \humhub\modules\calendar\models\CalendarEntry($container);
             $voting->title = Yii::t('ElectionModule.base', 'Voting: {title}', ['title' => $this->title]);
             $voting->description = Yii::t('ElectionModule.base', 'Chapter members can cast their votes for officer positions during this period.');
-            $voting->start_datetime = date($dbFormat, strtotime($this->candidacy_expires_at));
+            $voting->start_datetime = date($dbFormat, $votingStart);
             $voting->end_datetime = date($dbFormat, strtotime($this->voting_expires_at));
             $voting->all_day = 0;
-            $voting->color = '#5cb85c'; // success green
+            $voting->color = '#5cb85c';
             $voting->content->visibility = \humhub\modules\content\models\Content::VISIBILITY_PUBLIC;
-            if (!$voting->save()) {
+            if ($voting->save()) {
+                $this->updateAttributes(['voting_calendar_id' => $voting->id]);
+            } else {
                 Yii::error('Election voting calendar event failed: ' . json_encode($voting->getErrors()), 'election');
             }
         } catch (\Throwable $e) {
             Yii::error('Election calendar event creation failed: ' . $e->getMessage(), 'election');
+        }
+    }
+
+    /**
+     * Deletes the associated calendar events (used when election is cancelled).
+     */
+    public function deleteCalendarEvents(): void
+    {
+        if (!class_exists('humhub\modules\calendar\models\CalendarEntry')) {
+            return;
+        }
+
+        try {
+            foreach (['candidacy_calendar_id', 'voting_calendar_id'] as $attr) {
+                if ($this->$attr) {
+                    $entry = \humhub\modules\calendar\models\CalendarEntry::findOne($this->$attr);
+                    if ($entry) {
+                        $entry->hardDelete();
+                    }
+                }
+            }
+            $this->updateAttributes([
+                'candidacy_calendar_id' => null,
+                'voting_calendar_id' => null,
+            ]);
+        } catch (\Throwable $e) {
+            Yii::error('Election calendar event deletion failed: ' . $e->getMessage(), 'election');
         }
     }
 

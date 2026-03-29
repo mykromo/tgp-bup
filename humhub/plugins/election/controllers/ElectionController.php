@@ -177,6 +177,7 @@ class ElectionController extends ContentContainerController
         $election = $this->findElection($id);
         $election->status = Election::STATUS_CANCELLED;
         $election->save(false);
+        $election->deleteCalendarEvents();
         return $this->redirect($this->contentContainer->createUrl('/election/election/view', ['id' => $id]));
     }
 
