@@ -54,24 +54,34 @@ humhub.module('reactions', function (module, require, $) {
         }
     });
 
-    // Remove bullet separators (·) from wall-entry-links
+    // Remove bullet separators (·) from post links and comment/reply links
     function cleanSeparators() {
-        $('.wall-entry-links, .comment-entry-links').each(function () {
+        $('.wall-entry-links, .wall-entry-controls').each(function () {
             var el = this;
             if ($(el).data('reactions-cleaned')) return;
             $(el).data('reactions-cleaned', true);
-            el.childNodes.forEach(function (node) {
-                if (node.nodeType === 3 && node.textContent.indexOf('\u00B7') !== -1) {
-                    node.textContent = ' ';
+            var nodes = el.childNodes;
+            for (var i = nodes.length - 1; i >= 0; i--) {
+                if (nodes[i].nodeType === 3) {
+                    nodes[i].textContent = '';
                 }
-            });
+            }
         });
     }
 
     $(document).on('humhub:ready', cleanSeparators);
     $(document).on('humhub:stream:afterAppend humhub:stream:afterInit', cleanSeparators);
-    // Also run after a short delay for dynamic content
     $(function () { setTimeout(cleanSeparators, 500); });
+    // Also clean after comments are loaded/added
+    $(document).on('humhub:comment:afterLoad humhub:comment:afterAdd', cleanSeparators);
+    // MutationObserver fallback for dynamic content
+    if (typeof MutationObserver !== 'undefined') {
+        $(function () {
+            new MutationObserver(function () {
+                cleanSeparators();
+            }).observe(document.body, { childList: true, subtree: true });
+        });
+    }
 
     function refresh($c, data) {
         var emojis = data.emojis || {};

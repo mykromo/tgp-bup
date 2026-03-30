@@ -6,14 +6,17 @@
     vertical-align: middle;
 }
 
-/* ── Wall entry links: remove bullet separators, align items ── */
-.wall-entry-links {
-    display: flex;
+/* ── Shared: post links + comment/reply links ── */
+.wall-entry-links,
+.wall-entry-controls {
+    display: flex !important;
     align-items: center;
     gap: 6px;
+    font-size: 0; /* collapse text-node separators */
 }
-.wall-entry-links > span:not(:first-child)::before {
-    content: none !important;
+.wall-entry-links > *,
+.wall-entry-controls > * {
+    font-size: 13px;
 }
 
 /* ── Trigger wrapper ── */
@@ -114,16 +117,7 @@
     margin-left: 2px;
 }
 
-/* ── Hide original Like link ── */
-.wall-entry-links .likeLinkContainer,
-.comment-entry-links .likeLinkContainer {
+/* ── Hide original Like link everywhere ── */
+.likeLinkContainer {
     display: none !important;
-}
-
-/* ── Remove bullet separators between wall entry link items ── */
-.wall-entry-links {
-    font-size: 0;
-}
-.wall-entry-links > * {
-    font-size: 13px;
 }
