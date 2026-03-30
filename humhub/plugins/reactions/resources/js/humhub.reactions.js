@@ -54,18 +54,28 @@ humhub.module('reactions', function (module, require, $) {
         }
     });
 
-    // Remove bullet separators (·) from post links and comment/reply links
+    // Remove bullet separators and push Reply to the right
     function cleanSeparators() {
         $('.wall-entry-links, .wall-entry-controls').each(function () {
             var el = this;
             if ($(el).data('reactions-cleaned')) return;
             $(el).data('reactions-cleaned', true);
+            // Remove text node separators
             var nodes = el.childNodes;
             for (var i = nodes.length - 1; i >= 0; i--) {
                 if (nodes[i].nodeType === 3) {
                     nodes[i].textContent = '';
                 }
             }
+            // Push Comment/Reply link to the right
+            $(el).children().each(function () {
+                var $child = $(this);
+                if ($child.find('.comment-create-link, .toggleComments').length ||
+                    $child.hasClass('commentLink') ||
+                    $child.find('a[data-action-click*="comment"]').length) {
+                    $child.css('margin-left', 'auto');
+                }
+            });
         });
     }
 

@@ -32,7 +32,7 @@ class Events extends BaseObject
         $event->sender->removeWidget(LikeLink::class);
         $object = $event->sender->object;
         if ($object) {
-            $event->sender->addWidget(ReactionLink::class, ['object' => $object], ['sortOrder' => 200]);
+            $event->sender->addWidget(ReactionLink::class, ['object' => $object], ['sortOrder' => 50]);
         }
     }
 

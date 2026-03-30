@@ -19,6 +19,14 @@
     font-size: 13px;
 }
 
+/* Push Reply/Comment link to the right */
+.wall-entry-controls .commentLink,
+.wall-entry-controls > a[data-action-click="comment.toggleComments"],
+.wall-entry-controls > span:last-child:not(.reaction-container),
+.wall-entry-links > span:last-child:not(.reaction-container) {
+    margin-left: auto;
+}
+
 /* ── Trigger wrapper ── */
 .reaction-trigger {
     position: relative;
