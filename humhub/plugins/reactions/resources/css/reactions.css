@@ -100,3 +100,9 @@
     color: #999;
     margin-left: 2px;
 }
+
+/* Hide the original Like link when reactions module is active */
+.wall-entry-links .likeLinkContainer,
+.comment-entry-links .likeLinkContainer {
+    display: none !important;
+}

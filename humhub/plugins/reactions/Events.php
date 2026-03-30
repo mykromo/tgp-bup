@@ -3,6 +3,7 @@
 namespace humhub\modules\reactions;
 
 use humhub\components\behaviors\PolymorphicRelation;
+use humhub\modules\like\widgets\LikeLink;
 use humhub\modules\reactions\models\Reaction;
 use humhub\modules\reactions\widgets\ReactionLink;
 use Yii;
@@ -16,7 +17,7 @@ class Events extends BaseObject
         if (!Yii::$app->getModule('reactions')) {
             return;
         }
-        $event->sender->removeWidget('humhub\modules\like\widgets\LikeLink');
+        $event->sender->removeWidget(LikeLink::class);
         $object = $event->sender->object;
         if ($object) {
             $event->sender->addWidget(ReactionLink::class, ['object' => $object], ['sortOrder' => 10]);
@@ -28,7 +29,7 @@ class Events extends BaseObject
         if (!Yii::$app->getModule('reactions')) {
             return;
         }
-        $event->sender->removeWidget('humhub\modules\like\widgets\LikeLink');
+        $event->sender->removeWidget(LikeLink::class);
         $object = $event->sender->object;
         if ($object) {
             $event->sender->addWidget(ReactionLink::class, ['object' => $object], ['sortOrder' => 200]);
