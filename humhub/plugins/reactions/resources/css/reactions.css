@@ -1,3 +1,4 @@
+/* ── Reaction Container ── */
 .reaction-container {
     display: inline-flex;
     align-items: center;
@@ -5,39 +6,51 @@
     vertical-align: middle;
 }
 
-/* Trigger wrapper */
+/* ── Wall entry links: remove bullet separators, align items ── */
+.wall-entry-links {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.wall-entry-links > span:not(:first-child)::before {
+    content: none !important;
+}
+
+/* ── Trigger wrapper ── */
 .reaction-trigger {
     position: relative;
     display: inline-block;
 }
 
-/* The main button */
+/* ── Main button ── */
 .reaction-btn-toggle {
     text-decoration: none;
     font-size: 14px;
     color: #777;
     cursor: pointer;
-    padding: 2px 4px;
+    padding: 2px 6px;
     border-radius: 4px;
     transition: background .15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
 }
-.reaction-btn-toggle:hover {
+.reaction-btn-toggle:hover,
+.reaction-btn-toggle:focus {
     background: #f0f0f0;
     text-decoration: none;
+    color: #555;
 }
-.reaction-btn-toggle .reaction-btn {
+.reaction-btn {
     font-size: 15px;
+    line-height: 1;
 }
-.reaction-btn-toggle .reaction-label {
+.reaction-label {
     font-size: 12px;
-    margin-left: 2px;
     color: #777;
 }
-.reaction-container[data-user-reaction] .reaction-btn-toggle .reaction-label {
-    font-weight: 600;
-}
 
-/* Picker popup */
+/* ── Picker popup ── */
 .reaction-picker {
     display: none;
     position: absolute;
@@ -57,7 +70,7 @@
     to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* Individual emoji in picker */
+/* ── Emoji in picker ── */
 .reaction-emoji-btn {
     text-decoration: none;
     font-size: 24px;
@@ -72,7 +85,7 @@
     text-decoration: none;
 }
 
-/* Summary badges */
+/* ── Summary badges ── */
 .reaction-summary {
     display: inline-flex;
     align-items: center;
@@ -95,14 +108,22 @@
     color: #666;
     margin-left: 1px;
 }
-.reaction-summary .reaction-total {
+.reaction-total {
     font-size: 11px;
     color: #999;
     margin-left: 2px;
 }
 
-/* Hide the original Like link when reactions module is active */
+/* ── Hide original Like link ── */
 .wall-entry-links .likeLinkContainer,
 .comment-entry-links .likeLinkContainer {
     display: none !important;
+}
+
+/* ── Remove bullet separators between wall entry link items ── */
+.wall-entry-links {
+    font-size: 0;
+}
+.wall-entry-links > * {
+    font-size: 13px;
 }

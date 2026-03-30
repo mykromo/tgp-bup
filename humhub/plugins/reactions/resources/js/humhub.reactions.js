@@ -54,6 +54,25 @@ humhub.module('reactions', function (module, require, $) {
         }
     });
 
+    // Remove bullet separators (·) from wall-entry-links
+    function cleanSeparators() {
+        $('.wall-entry-links, .comment-entry-links').each(function () {
+            var el = this;
+            if ($(el).data('reactions-cleaned')) return;
+            $(el).data('reactions-cleaned', true);
+            el.childNodes.forEach(function (node) {
+                if (node.nodeType === 3 && node.textContent.indexOf('\u00B7') !== -1) {
+                    node.textContent = ' ';
+                }
+            });
+        });
+    }
+
+    $(document).on('humhub:ready', cleanSeparators);
+    $(document).on('humhub:stream:afterAppend humhub:stream:afterInit', cleanSeparators);
+    // Also run after a short delay for dynamic content
+    $(function () { setTimeout(cleanSeparators, 500); });
+
     function refresh($c, data) {
         var emojis = data.emojis || {};
         var summary = data.summary || {};
