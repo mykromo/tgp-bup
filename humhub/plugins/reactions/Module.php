@@ -19,6 +19,12 @@ class Module extends BaseModule
         'angry' => '😡',
     ];
 
+    public function init()
+    {
+        parent::init();
+        \Yii::setAlias('@reactions', $this->getBasePath());
+    }
+
     public function getName()
     {
         return Yii::t('ReactionsModule.base', 'Emoji Reactions');
