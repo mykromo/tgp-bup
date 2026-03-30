@@ -1,0 +1,7 @@
+{
+    "id": "reactions",
+    "name": "Emoji Reactions",
+    "description": "Facebook-style emoji reactions for posts and comments",
+    "keywords": ["emoji", "reactions", "like", "love", "haha"],
+    "version": "1.0.0"
+}
