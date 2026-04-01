@@ -18,9 +18,34 @@ $this->pageTitle = Html::encode($election->title);
 <div class="panel panel-default">
     <div class="panel-heading">
         <strong><?= Html::encode($election->title) ?></strong>
-        <span class="label <?= $election->getPhaseBadgeClass() ?> pull-right" style="margin-top:2px">
-            <?= $election->getPhaseLabel() ?>
-        </span>
+        <div class="pull-right">
+            <span class="label <?= $election->getPhaseBadgeClass() ?>" style="margin-top:2px; display:inline-block; vertical-align:middle">
+                <?= $election->getPhaseLabel() ?>
+            </span>
+            <?php if ($canManage && $election->isOpen()): ?>
+                <a href="<?= $contentContainer->createUrl('/election/election/close', ['id' => $election->id]) ?>"
+                   class="btn btn-warning btn-sm"
+                   data-method="post"
+                   data-confirm="<?= Yii::t('ElectionModule.base', 'Are you sure you want to close this election?') ?>">
+                    <i class="fa fa-lock"></i> <?= Yii::t('ElectionModule.base', 'Close Election') ?>
+                </a>
+                <a href="<?= $contentContainer->createUrl('/election/election/cancel', ['id' => $election->id]) ?>"
+                   class="btn btn-danger btn-sm"
+                   data-method="post"
+                   data-confirm="<?= Yii::t('ElectionModule.base', 'Are you sure you want to cancel this election? This cannot be undone and will not affect current officers.') ?>">
+                    <i class="fa fa-ban"></i> <?= Yii::t('ElectionModule.base', 'Cancel Election') ?>
+                </a>
+            <?php elseif ($canManage && $phase === 'closed'): ?>
+                <a href="<?= $contentContainer->createUrl('/election/election/reopen', ['id' => $election->id]) ?>"
+                   class="btn btn-info btn-sm" data-method="post">
+                    <i class="fa fa-unlock"></i> <?= Yii::t('ElectionModule.base', 'Reopen Election') ?>
+                </a>
+            <?php elseif ($canManage && $phase === 'cancelled'): ?>
+                <span class="label label-warning" style="font-size:13px">
+                    <i class="fa fa-ban"></i> <?= Yii::t('ElectionModule.base', 'This election has been cancelled') ?>
+                </span>
+            <?php endif; ?>
+        </div>
     </div>
     <div class="panel-body">
         <?php if ($election->description): ?>
@@ -141,33 +166,8 @@ $this->pageTitle = Html::encode($election->title);
         <?php endforeach; ?>
 
         <hr>
-        <div>
-            <a href="<?= $contentContainer->createUrl('/election/election/index') ?>" class="btn btn-default">
-                <i class="fa fa-arrow-left"></i> <?= Yii::t('ElectionModule.base', 'Back to Elections') ?>
-            </a>
-            <?php if ($canManage && $election->isOpen()): ?>
-                <a href="<?= $contentContainer->createUrl('/election/election/cancel', ['id' => $election->id]) ?>"
-                   class="btn btn-danger pull-right" style="margin-left:5px"
-                   data-method="post"
-                   data-confirm="<?= Yii::t('ElectionModule.base', 'Are you sure you want to cancel this election? This cannot be undone and will not affect current officers.') ?>">
-                    <i class="fa fa-ban"></i> <?= Yii::t('ElectionModule.base', 'Cancel Election') ?>
-                </a>
-                <a href="<?= $contentContainer->createUrl('/election/election/close', ['id' => $election->id]) ?>"
-                   class="btn btn-warning pull-right"
-                   data-method="post"
-                   data-confirm="<?= Yii::t('ElectionModule.base', 'Are you sure you want to close this election?') ?>">
-                    <i class="fa fa-lock"></i> <?= Yii::t('ElectionModule.base', 'Close Election') ?>
-                </a>
-            <?php elseif ($canManage && $phase === 'closed'): ?>
-                <a href="<?= $contentContainer->createUrl('/election/election/reopen', ['id' => $election->id]) ?>"
-                   class="btn btn-info pull-right" data-method="post">
-                    <i class="fa fa-unlock"></i> <?= Yii::t('ElectionModule.base', 'Reopen Election') ?>
-                </a>
-            <?php elseif ($canManage && $phase === 'cancelled'): ?>
-                <span class="label label-warning pull-right" style="margin-top:5px; font-size:13px">
-                    <i class="fa fa-ban"></i> <?= Yii::t('ElectionModule.base', 'This election has been cancelled') ?>
-                </span>
-            <?php endif; ?>
-        </div>
+        <a href="<?= $contentContainer->createUrl('/election/election/index') ?>" class="btn btn-default">
+            <i class="fa fa-arrow-left"></i> <?= Yii::t('ElectionModule.base', 'Back to Elections') ?>
+        </a>
     </div>
 </div>

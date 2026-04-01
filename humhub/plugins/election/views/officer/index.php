@@ -16,16 +16,16 @@ $this->pageTitle = Yii::t('ElectionModule.base', 'Chapter Officers');
 <div class="panel panel-default">
     <div class="panel-heading">
         <strong><i class="fa fa-id-badge"></i> <?= Yii::t('ElectionModule.base', 'Chapter Officers') ?></strong>
+        <?php if ($canManage): ?>
+            <div class="pull-right">
+                <a href="<?= $contentContainer->createUrl('/election/election/index') ?>" class="btn btn-primary btn-sm">
+                    <i class="fa fa-check-square-o"></i> <?= Yii::t('ElectionModule.base', 'Elections') ?></a>
+                <a href="<?= $contentContainer->createUrl('/election/position/index') ?>" class="btn btn-primary btn-sm">
+                    <i class="fa fa-cog"></i> <?= Yii::t('ElectionModule.base', 'Manage Positions') ?></a>
+            </div>
+        <?php endif; ?>
     </div>
     <div class="panel-body">
-        <?php if ($canManage): ?>
-        <div style="margin-bottom:15px">
-            <a href="<?= $contentContainer->createUrl('/election/election/index') ?>" class="btn btn-primary btn-sm">
-                <i class="fa fa-check-square-o"></i> <?= Yii::t('ElectionModule.base', 'Elections') ?></a>
-            <a href="<?= $contentContainer->createUrl('/election/position/index') ?>" class="btn btn-primary btn-sm">
-                <i class="fa fa-cog"></i> <?= Yii::t('ElectionModule.base', 'Manage Positions') ?></a>
-        </div>
-        <?php endif; ?>
         <?php if (empty($positions)): ?>
             <div class="text-center text-muted" style="padding:30px 0">
                 <p><i class="fa fa-id-badge" style="font-size:48px"></i></p>

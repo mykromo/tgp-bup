@@ -94,8 +94,8 @@ $this->pageTitle = Yii::t('ElectionModule.base', 'Manage Positions');
         <?php endif; ?>
 
         <hr>
-        <a href="<?= $contentContainer->createUrl('/election/election/index') ?>" class="btn btn-default">
-            <i class="fa fa-arrow-left"></i> <?= Yii::t('ElectionModule.base', 'Back to Elections') ?>
+        <a href="<?= $contentContainer->createUrl('/election/officer/index') ?>" class="btn btn-default">
+            <i class="fa fa-arrow-left"></i> <?= Yii::t('ElectionModule.base', 'Back to Officers') ?>
         </a>
     </div>
 </div>
