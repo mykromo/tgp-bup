@@ -1,0 +1,7 @@
+{
+    "id": "stewardship",
+    "name": "Financial Stewardship",
+    "description": "Non-profit fund accounting, multi-entity consolidation, grant reporting, and audit compliance for chapters",
+    "keywords": ["finance", "fund", "accounting", "grant", "audit", "stewardship", "non-profit"],
+    "version": "1.0.0"
+}
