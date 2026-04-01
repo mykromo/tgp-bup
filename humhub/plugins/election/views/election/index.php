@@ -16,10 +16,6 @@ $this->pageTitle = Yii::t('ElectionModule.base', 'Officer Elections');
         <strong><?= Yii::t('ElectionModule.base', 'Officer Elections') ?></strong>
         <?php if ($canCreate): ?>
             <div class="pull-right">
-                <a href="<?= $contentContainer->createUrl('/election/position/index') ?>"
-                   class="btn btn-default btn-sm">
-                    <i class="fa fa-cog"></i> <?= Yii::t('ElectionModule.base', 'Manage Positions') ?>
-                </a>
                 <a href="<?= $contentContainer->createUrl('/election/election/create') ?>"
                    class="btn btn-primary btn-sm">
                     <i class="fa fa-plus"></i> <?= Yii::t('ElectionModule.base', 'Create Election') ?>

@@ -20,9 +20,9 @@ $this->pageTitle = Yii::t('ElectionModule.base', 'Chapter Officers');
     <div class="panel-body">
         <?php if ($canManage): ?>
         <div style="margin-bottom:15px">
-            <a href="<?= $contentContainer->createUrl('/election/election/index') ?>" class="btn btn-default btn-sm">
+            <a href="<?= $contentContainer->createUrl('/election/election/index') ?>" class="btn btn-primary btn-sm">
                 <i class="fa fa-check-square-o"></i> <?= Yii::t('ElectionModule.base', 'Elections') ?></a>
-            <a href="<?= $contentContainer->createUrl('/election/position/index') ?>" class="btn btn-default btn-sm">
+            <a href="<?= $contentContainer->createUrl('/election/position/index') ?>" class="btn btn-primary btn-sm">
                 <i class="fa fa-cog"></i> <?= Yii::t('ElectionModule.base', 'Manage Positions') ?></a>
         </div>
         <?php endif; ?>
