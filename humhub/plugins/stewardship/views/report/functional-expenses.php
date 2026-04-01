@@ -3,7 +3,6 @@ use humhub\libs\Html;
 use humhub\modules\stewardship\models\Transaction;
 $this->pageTitle = Yii::t('StewardshipModule.base', 'Statement of Functional Expenses');
 $cc = $contentContainer;
-$categories = Transaction::getFunctionalLabels();
 $grouped = [];
 foreach ($rows as $r) {
     $cat = $r['functional_category'] ?: 'unclassified';

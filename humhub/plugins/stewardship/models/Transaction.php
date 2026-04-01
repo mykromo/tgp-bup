@@ -26,7 +26,7 @@ class Transaction extends ActiveRecord
             [['space_id', 'fund_id', 'grant_id'], 'integer'],
             [['amount'], 'number', 'min' => 0.01],
             [['type'], 'in', 'range' => [self::TYPE_INCOME, self::TYPE_EXPENSE, self::TYPE_TRANSFER_IN, self::TYPE_TRANSFER_OUT]],
-            [['functional_category'], 'in', 'range' => [self::FUNC_PROGRAM, self::FUNC_MANAGEMENT, self::FUNC_FUNDRAISING]],
+            [['functional_category'], 'string', 'max' => 50],
             [['description'], 'string', 'max' => 500],
             [['reference', 'program_name'], 'string', 'max' => 255],
             [['transaction_date'], 'safe'],
@@ -99,12 +99,16 @@ class Transaction extends ActiveRecord
         ];
     }
 
-    public static function getFunctionalLabels(): array
+    public static function getFunctionalLabels(?int $spaceId = null): array
     {
+        if ($spaceId) {
+            return FunctionalCategory::getActiveMap($spaceId);
+        }
+        // Fallback defaults
         return [
-            self::FUNC_PROGRAM => Yii::t('StewardshipModule.base', 'Program Services'),
-            self::FUNC_MANAGEMENT => Yii::t('StewardshipModule.base', 'Management & General'),
-            self::FUNC_FUNDRAISING => Yii::t('StewardshipModule.base', 'Fundraising'),
+            'program' => Yii::t('StewardshipModule.base', 'Program Services'),
+            'management' => Yii::t('StewardshipModule.base', 'Management & General'),
+            'fundraising' => Yii::t('StewardshipModule.base', 'Fundraising'),
         ];
     }
 

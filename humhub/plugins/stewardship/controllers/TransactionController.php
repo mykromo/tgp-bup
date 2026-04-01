@@ -35,6 +35,7 @@ class TransactionController extends ContentContainerController
             'model' => $model,
             'funds' => Fund::find()->where(['space_id' => $spaceId, 'is_active' => 1])->all(),
             'grants' => Grant::find()->where(['space_id' => $spaceId, 'status' => 'active'])->all(),
+            'categories' => \humhub\modules\stewardship\models\FunctionalCategory::getActiveMap($spaceId),
             'contentContainer' => $this->contentContainer,
         ]);
     }
@@ -58,10 +59,7 @@ class TransactionController extends ContentContainerController
 
     public function actionLedger()
     {
-        if (!$this->contentContainer->permissionManager->can(\humhub\modules\stewardship\permissions\ViewFinances::class)) {
-            throw new ForbiddenHttpException();
-        }
-
+        // Visible to all chapter members (read-only)
         $spaceId = $this->contentContainer->id;
         $fundId = Yii::$app->request->get('fund_id');
         $query = Transaction::find()->where(['space_id' => $spaceId])->orderBy(['transaction_date' => SORT_DESC, 'id' => SORT_DESC]);
@@ -72,6 +70,7 @@ class TransactionController extends ContentContainerController
         return $this->render('ledger', [
             'transactions' => $query->all(),
             'funds' => Fund::find()->where(['space_id' => $spaceId])->all(),
+            'categories' => \humhub\modules\stewardship\models\FunctionalCategory::getActiveMap($spaceId),
             'selectedFund' => $fundId,
             'contentContainer' => $this->contentContainer,
         ]);

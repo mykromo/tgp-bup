@@ -17,7 +17,7 @@ $this->pageTitle = Yii::t('StewardshipModule.base', 'Record Transaction');
         <?= $form->field($model, 'amount')->input('number', ['step' => '0.01', 'min' => '0.01']) ?>
         <?= $form->field($model, 'description')->textInput(['maxlength' => 500]) ?>
         <?= $form->field($model, 'transaction_date')->input('date') ?>
-        <?= $form->field($model, 'functional_category')->dropDownList(Transaction::getFunctionalLabels(), ['prompt' => '— Optional —']) ?>
+        <?= $form->field($model, 'functional_category')->dropDownList($categories, ['prompt' => '— Optional —']) ?>
         <?= $form->field($model, 'program_name')->textInput(['maxlength' => 255])
             ->hint(Yii::t('StewardshipModule.base', 'Required for program expenses. Must match the fund restriction purpose for restricted funds.')) ?>
         <?= $form->field($model, 'grant_id')->dropDownList(

@@ -6,21 +6,19 @@ use humhub\modules\content\components\ContentContainerController;
 use humhub\modules\stewardship\models\Fund;
 use humhub\modules\stewardship\models\Grant;
 use humhub\modules\stewardship\models\Transaction;
-use humhub\modules\stewardship\permissions\ViewFinances;
+use humhub\modules\stewardship\permissions\ManageFinances;
 use humhub\modules\space\models\Space;
-use Yii;
-use yii\web\ForbiddenHttpException;
 
 class DashboardController extends ContentContainerController
 {
     public $validContentContainerClasses = [Space::class];
 
+    /**
+     * Financial dashboard — visible to all chapter members.
+     * Management actions only shown to admins.
+     */
     public function actionIndex()
     {
-        if (!$this->contentContainer->permissionManager->can(ViewFinances::class)) {
-            throw new ForbiddenHttpException();
-        }
-
         $spaceId = $this->contentContainer->id;
         $funds = Fund::find()->where(['space_id' => $spaceId, 'is_active' => 1])->all();
         $grants = Grant::find()->where(['space_id' => $spaceId, 'status' => 'active'])->all();
@@ -42,7 +40,7 @@ class DashboardController extends ContentContainerController
             'recentTxns' => $recentTxns,
             'totalByType' => $totalByType,
             'contentContainer' => $this->contentContainer,
-            'canManage' => $this->contentContainer->permissionManager->can(\humhub\modules\stewardship\permissions\ManageFinances::class),
+            'canManage' => $this->contentContainer->permissionManager->can(ManageFinances::class),
         ]);
     }
 }

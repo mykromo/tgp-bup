@@ -38,7 +38,7 @@ $cc = $contentContainer;
                         <td><?= Yii::$app->formatter->asDate($t->transaction_date) ?></td>
                         <td><?= Html::encode($t->fund->name ?? '') ?></td>
                         <td><?= Transaction::getTypeLabels()[$t->type] ?? $t->type ?></td>
-                        <td><?= $t->functional_category ? Transaction::getFunctionalLabels()[$t->functional_category] : '' ?></td>
+                        <td><?= $t->functional_category ? ($categories[$t->functional_category] ?? ucfirst($t->functional_category)) : '' ?></td>
                         <td><?= Html::encode($t->description) ?></td>
                         <td><?= Html::encode($t->reference) ?></td>
                         <td class="text-right"><?= Yii::$app->formatter->asCurrency($t->amount) ?></td>

@@ -4,28 +4,25 @@ namespace humhub\modules\stewardship\controllers;
 
 use humhub\modules\content\components\ContentContainerController;
 use humhub\modules\stewardship\models\Fund;
+use humhub\modules\stewardship\models\FunctionalCategory;
 use humhub\modules\stewardship\models\Grant;
 use humhub\modules\stewardship\models\Transaction;
 use humhub\modules\stewardship\models\AuditLog;
-use humhub\modules\stewardship\permissions\ViewFinances;
 use humhub\modules\space\models\Space;
 use Yii;
-use yii\web\ForbiddenHttpException;
 
 class ReportController extends ContentContainerController
 {
     public $validContentContainerClasses = [Space::class];
 
     /**
-     * Statement of Functional Expenses
+     * Statement of Functional Expenses — visible to all chapter members
      */
     public function actionFunctionalExpenses()
     {
-        if (!$this->contentContainer->permissionManager->can(ViewFinances::class)) {
-            throw new ForbiddenHttpException();
-        }
-
         $spaceId = $this->contentContainer->id;
+        $categories = FunctionalCategory::getActiveMap($spaceId);
+
         $rows = Transaction::find()
             ->select(['functional_category', 'program_name', 'SUM(amount) as total'])
             ->where(['space_id' => $spaceId, 'type' => 'expense', 'is_voided' => 0])
@@ -34,19 +31,16 @@ class ReportController extends ContentContainerController
 
         return $this->render('functional-expenses', [
             'rows' => $rows,
+            'categories' => $categories,
             'contentContainer' => $this->contentContainer,
         ]);
     }
 
     /**
-     * Grant utilization report
+     * Grant utilization report — visible to all chapter members
      */
     public function actionGrantUtilization()
     {
-        if (!$this->contentContainer->permissionManager->can(ViewFinances::class)) {
-            throw new ForbiddenHttpException();
-        }
-
         $grants = Grant::find()->where(['space_id' => $this->contentContainer->id])->all();
 
         return $this->render('grant-utilization', [
@@ -56,14 +50,10 @@ class ReportController extends ContentContainerController
     }
 
     /**
-     * Audit trail
+     * Audit trail — visible to all chapter members (read-only)
      */
     public function actionAuditTrail()
     {
-        if (!$this->contentContainer->permissionManager->can(ViewFinances::class)) {
-            throw new ForbiddenHttpException();
-        }
-
         $logs = AuditLog::find()
             ->where(['space_id' => $this->contentContainer->id])
             ->orderBy(['created_at' => SORT_DESC])
@@ -76,14 +66,10 @@ class ReportController extends ContentContainerController
     }
 
     /**
-     * Fund balance summary by restriction type
+     * Fund balance summary — visible to all chapter members
      */
     public function actionFundSummary()
     {
-        if (!$this->contentContainer->permissionManager->can(ViewFinances::class)) {
-            throw new ForbiddenHttpException();
-        }
-
         $funds = Fund::find()->where(['space_id' => $this->contentContainer->id])->orderBy(['fund_type' => SORT_ASC])->all();
 
         return $this->render('fund-summary', [
