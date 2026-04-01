@@ -111,6 +111,7 @@ class TransactionController extends ContentContainerController
             'funds' => Fund::find()->where(['space_id' => $spaceId])->all(),
             'categories' => \humhub\modules\stewardship\models\FunctionalCategory::getActiveMap($spaceId),
             'selectedFund' => $fundId,
+            'canManage' => $this->contentContainer->permissionManager->can(ManageFinances::class),
             'contentContainer' => $this->contentContainer,
         ]);
     }
