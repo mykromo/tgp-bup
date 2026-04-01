@@ -118,4 +118,31 @@ class TransactionController extends ContentContainerController
             'contentContainer' => $this->contentContainer,
         ]);
     }
+
+    public function actionExportLedger()
+    {
+        $spaceId = $this->contentContainer->id;
+        $format = Yii::$app->request->get('format', 'csv');
+        $fundId = Yii::$app->request->get('fund_id');
+        $query = Transaction::find()->where(['space_id' => $spaceId])->orderBy(['transaction_date' => SORT_DESC]);
+        if ($fundId) $query->andWhere(['fund_id' => $fundId]);
+        $categories = \humhub\modules\stewardship\models\FunctionalCategory::getActiveMap($spaceId);
+
+        $headers = ['Date', 'Fund', 'Type', 'Category', 'Description', 'Reference', 'Amount', 'Status'];
+        $rows = [];
+        foreach ($query->all() as $t) {
+            $rows[] = [
+                $t->transaction_date,
+                $t->fund->name ?? '',
+                Transaction::getTypeLabels()[$t->type] ?? $t->type,
+                $t->functional_category ? ($categories[$t->functional_category] ?? $t->functional_category) : '',
+                $t->description,
+                $t->reference ?? '',
+                number_format((float) $t->amount, 2),
+                $t->is_voided ? 'VOID' : 'Active',
+            ];
+        }
+
+        \humhub\modules\stewardship\helpers\Export::download($format, 'ledger', 'Transaction Ledger', $headers, $rows);
+    }
 }

@@ -8,7 +8,10 @@ $byType = [];
 foreach ($funds as $f) { $byType[$f->fund_type][] = $f; }
 ?>
 <div class="panel panel-default">
-    <div class="panel-heading"><strong><i class="fa fa-balance-scale"></i> <?= $this->title ?></strong></div>
+    <div class="panel-heading">
+        <strong><i class="fa fa-balance-scale"></i> <?= $this->title ?></strong>
+        <div class="pull-right"><?= $this->render('@stewardship/views/_export_buttons', ['url' => $cc->createUrl('/stewardship/report/export-fund-summary')]) ?></div>
+    </div>
     <div class="panel-body">
         <?php foreach ($typeLabels as $type => $label): ?>
             <h4><?= $label ?></h4>

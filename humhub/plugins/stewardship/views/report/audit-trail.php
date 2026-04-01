@@ -4,7 +4,10 @@ $this->title = Yii::t('StewardshipModule.base', 'Audit Trail');
 $cc = $contentContainer;
 ?>
 <div class="panel panel-default">
-<div class="panel-heading"><strong><i class="fa fa-shield"></i> <?= $this->title ?></strong></div>
+<div class="panel-heading">
+<strong><i class="fa fa-shield"></i> <?= $this->title ?></strong>
+<div class="pull-right"><?= $this->render('@stewardship/views/_export_buttons', ['url' => $cc->createUrl('/stewardship/report/export-audit-trail')]) ?></div>
+</div>
 <div class="panel-body">
 <?php if (empty($logs)): ?>
 <p class="text-muted">No audit entries yet.</p>

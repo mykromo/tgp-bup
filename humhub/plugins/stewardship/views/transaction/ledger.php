@@ -6,7 +6,10 @@ $this->title = Yii::t('StewardshipModule.base', 'Transaction Ledger');
 $cc = $contentContainer;
 ?>
 <div class="panel panel-default">
-    <div class="panel-heading"><strong><i class="fa fa-list"></i> <?= $this->title ?></strong></div>
+    <div class="panel-heading">
+        <strong><i class="fa fa-list"></i> <?= $this->title ?></strong>
+        <div class="pull-right"><?= $this->render('@stewardship/views/_export_buttons', ['url' => $cc->createUrl('/stewardship/transaction/export-ledger', ['fund_id' => $selectedFund])]) ?></div>
+    </div>
     <div class="panel-body">
         <form method="get" action="<?= $cc->createUrl('/stewardship/transaction/ledger') ?>" class="form-inline" style="margin-bottom:15px">
             <input type="hidden" name="cguid" value="<?= $cc->guid ?>">

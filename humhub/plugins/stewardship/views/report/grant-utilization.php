@@ -4,7 +4,10 @@ $this->title = Yii::t('StewardshipModule.base', 'Grant Utilization Report');
 $cc = $contentContainer;
 ?>
 <div class="panel panel-default">
-    <div class="panel-heading"><strong><i class="fa fa-bar-chart"></i> <?= $this->title ?></strong></div>
+    <div class="panel-heading">
+        <strong><i class="fa fa-bar-chart"></i> <?= $this->title ?></strong>
+        <div class="pull-right"><?= $this->render('@stewardship/views/_export_buttons', ['url' => $cc->createUrl('/stewardship/report/export-grant-utilization')]) ?></div>
+    </div>
     <div class="panel-body">
         <?php if (empty($grants)): ?>
             <p class="text-muted"><?= Yii::t('StewardshipModule.base', 'No grants found.') ?></p>

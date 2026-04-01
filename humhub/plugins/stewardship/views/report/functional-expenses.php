@@ -11,7 +11,10 @@ foreach ($rows as $r) {
 }
 ?>
 <div class="panel panel-default">
-    <div class="panel-heading"><strong><i class="fa fa-pie-chart"></i> <?= $this->title ?></strong></div>
+    <div class="panel-heading">
+        <strong><i class="fa fa-pie-chart"></i> <?= $this->title ?></strong>
+        <div class="pull-right"><?= $this->render('@stewardship/views/_export_buttons', ['url' => $cc->createUrl('/stewardship/report/export-functional-expenses')]) ?></div>
+    </div>
     <div class="panel-body">
         <p class="help-block"><?= Yii::t('StewardshipModule.base', 'Expenses broken down by functional category and program, as required for non-profit transparency reporting.') ?></p>
         <?php if (empty($grouped)): ?>
