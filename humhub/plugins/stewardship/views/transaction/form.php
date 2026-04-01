@@ -3,10 +3,10 @@ use humhub\libs\Html;
 use humhub\modules\stewardship\models\Transaction;
 use yii\bootstrap\ActiveForm;
 use yii\helpers\ArrayHelper;
-$this->pageTitle = Yii::t('StewardshipModule.base', 'Record Transaction');
+$this->title = Yii::t('StewardshipModule.base', 'Record Transaction');
 ?>
 <div class="panel panel-default">
-    <div class="panel-heading"><strong><?= $this->pageTitle ?></strong></div>
+    <div class="panel-heading"><strong><?= $this->title ?></strong></div>
     <div class="panel-body">
         <?php $form = ActiveForm::begin(); ?>
         <?= $form->field($model, 'fund_id')->dropDownList(

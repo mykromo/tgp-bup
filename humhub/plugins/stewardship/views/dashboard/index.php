@@ -7,7 +7,7 @@ use humhub\modules\stewardship\models\Transaction;
 /* @var $recentTxns Transaction[] */
 /* @var $totalByType array */
 /* @var $canManage bool */
-$this->pageTitle = Yii::t('StewardshipModule.base', 'Financial Dashboard');
+$this->title = Yii::t('StewardshipModule.base', 'Financial Dashboard');
 $cc = $contentContainer;
 ?>
 <div class="panel panel-default">

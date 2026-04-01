@@ -2,11 +2,11 @@
 use humhub\libs\Html;
 use humhub\modules\stewardship\models\Transaction;
 use yii\helpers\ArrayHelper;
-$this->pageTitle = Yii::t('StewardshipModule.base', 'Transaction Ledger');
+$this->title = Yii::t('StewardshipModule.base', 'Transaction Ledger');
 $cc = $contentContainer;
 ?>
 <div class="panel panel-default">
-    <div class="panel-heading"><strong><i class="fa fa-list"></i> <?= $this->pageTitle ?></strong></div>
+    <div class="panel-heading"><strong><i class="fa fa-list"></i> <?= $this->title ?></strong></div>
     <div class="panel-body">
         <form method="get" action="<?= $cc->createUrl('/stewardship/transaction/ledger') ?>" class="form-inline" style="margin-bottom:15px">
             <input type="hidden" name="cguid" value="<?= $cc->guid ?>">

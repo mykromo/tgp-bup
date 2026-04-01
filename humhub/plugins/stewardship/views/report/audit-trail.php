@@ -1,10 +1,10 @@
 <?php
 use humhub\libs\Html;
-$this->pageTitle = Yii::t('StewardshipModule.base', 'Audit Trail');
+$this->title = Yii::t('StewardshipModule.base', 'Audit Trail');
 $cc = $contentContainer;
 ?>
 <div class="panel panel-default">
-    <div class="panel-heading"><strong><i class="fa fa-shield"></i> <?= $this->pageTitle ?></strong></div>
+    <div class="panel-heading"><strong><i class="fa fa-shield"></i> <?= $this->title ?></strong></div>
     <div class="panel-body">
         <p class="help-block"><?= Yii::t('StewardshipModule.base', 'Immutable log of all financial actions. Records cannot be edited or deleted.') ?></p>
         <?php if (empty($logs)): ?>

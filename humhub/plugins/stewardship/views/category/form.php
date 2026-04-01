@@ -2,11 +2,11 @@
 use humhub\libs\Html;
 use yii\bootstrap\ActiveForm;
 $isNew = $model->isNewRecord;
-$this->pageTitle = $isNew ? Yii::t('StewardshipModule.base', 'Add Category') : Yii::t('StewardshipModule.base', 'Edit Category');
+$this->title = $isNew ? Yii::t('StewardshipModule.base', 'Add Category') : Yii::t('StewardshipModule.base', 'Edit Category');
 $cc = $contentContainer;
 ?>
 <div class="panel panel-default">
-    <div class="panel-heading"><strong><?= $this->pageTitle ?></strong></div>
+    <div class="panel-heading"><strong><?= $this->title ?></strong></div>
     <div class="panel-body">
         <?php $form = ActiveForm::begin(); ?>
         <?php if ($isNew): ?>

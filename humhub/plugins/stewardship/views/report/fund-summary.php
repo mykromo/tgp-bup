@@ -1,14 +1,14 @@
 <?php
 use humhub\libs\Html;
 use humhub\modules\stewardship\models\Fund;
-$this->pageTitle = Yii::t('StewardshipModule.base', 'Fund Balance Summary');
+$this->title = Yii::t('StewardshipModule.base', 'Fund Balance Summary');
 $cc = $contentContainer;
 $typeLabels = Fund::getTypeLabels();
 $byType = [];
 foreach ($funds as $f) { $byType[$f->fund_type][] = $f; }
 ?>
 <div class="panel panel-default">
-    <div class="panel-heading"><strong><i class="fa fa-balance-scale"></i> <?= $this->pageTitle ?></strong></div>
+    <div class="panel-heading"><strong><i class="fa fa-balance-scale"></i> <?= $this->title ?></strong></div>
     <div class="panel-body">
         <?php foreach ($typeLabels as $type => $label): ?>
             <h4><?= $label ?></h4>

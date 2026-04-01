@@ -3,10 +3,10 @@ use humhub\libs\Html;
 use humhub\modules\stewardship\models\Fund;
 use yii\bootstrap\ActiveForm;
 $isNew = $model->isNewRecord;
-$this->pageTitle = $isNew ? Yii::t('StewardshipModule.base', 'Create Fund') : Yii::t('StewardshipModule.base', 'Edit Fund');
+$this->title = $isNew ? Yii::t('StewardshipModule.base', 'Create Fund') : Yii::t('StewardshipModule.base', 'Edit Fund');
 ?>
 <div class="panel panel-default">
-    <div class="panel-heading"><strong><?= $this->pageTitle ?></strong></div>
+    <div class="panel-heading"><strong><?= $this->title ?></strong></div>
     <div class="panel-body">
         <?php $form = ActiveForm::begin(); ?>
         <?= $form->field($model, 'name')->textInput(['maxlength' => 255]) ?>

@@ -1,7 +1,7 @@
 <?php
 use humhub\libs\Html;
 use humhub\modules\stewardship\models\Transaction;
-$this->pageTitle = Yii::t('StewardshipModule.base', 'Statement of Functional Expenses');
+$this->title = Yii::t('StewardshipModule.base', 'Statement of Functional Expenses');
 $cc = $contentContainer;
 $grouped = [];
 foreach ($rows as $r) {
@@ -11,7 +11,7 @@ foreach ($rows as $r) {
 }
 ?>
 <div class="panel panel-default">
-    <div class="panel-heading"><strong><i class="fa fa-pie-chart"></i> <?= $this->pageTitle ?></strong></div>
+    <div class="panel-heading"><strong><i class="fa fa-pie-chart"></i> <?= $this->title ?></strong></div>
     <div class="panel-body">
         <p class="help-block"><?= Yii::t('StewardshipModule.base', 'Expenses broken down by functional category and program, as required for non-profit transparency reporting.') ?></p>
         <?php if (empty($grouped)): ?>

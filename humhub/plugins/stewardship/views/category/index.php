@@ -1,11 +1,11 @@
 <?php
 use humhub\libs\Html;
-$this->pageTitle = Yii::t('StewardshipModule.base', 'Manage Functional Categories');
+$this->title = Yii::t('StewardshipModule.base', 'Manage Functional Categories');
 $cc = $contentContainer;
 ?>
 <div class="panel panel-default">
     <div class="panel-heading">
-        <strong><i class="fa fa-tags"></i> <?= $this->pageTitle ?></strong>
+        <strong><i class="fa fa-tags"></i> <?= $this->title ?></strong>
         <a href="<?= $cc->createUrl('/stewardship/category/create') ?>" class="btn btn-primary btn-sm pull-right">
             <i class="fa fa-plus"></i> <?= Yii::t('StewardshipModule.base', 'Add Category') ?></a>
     </div>
