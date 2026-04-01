@@ -143,6 +143,6 @@ class TransactionController extends ContentContainerController
             ];
         }
 
-        \humhub\modules\stewardship\helpers\Export::download($format, 'ledger', 'Transaction Ledger', $headers, $rows);
+        return \humhub\modules\stewardship\helpers\Export::download($format, 'ledger', 'Transaction Ledger', $headers, $rows);
     }
 }

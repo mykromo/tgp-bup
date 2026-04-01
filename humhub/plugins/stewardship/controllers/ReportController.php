@@ -100,7 +100,7 @@ class ReportController extends ContentContainerController
             $data[] = [$categories[$cat] ?? ucfirst($cat), $r['program_name'] ?: 'General', number_format((float) $r['total'], 2)];
         }
 
-        \humhub\modules\stewardship\helpers\Export::download($format, 'functional-expenses', 'Statement of Functional Expenses', $headers, $data);
+        return \humhub\modules\stewardship\helpers\Export::download($format, 'functional-expenses', 'Statement of Functional Expenses', $headers, $data);
     }
 
     public function actionExportGrantUtilization()
@@ -114,7 +114,7 @@ class ReportController extends ContentContainerController
             $data[] = [$g->name, $g->grantor ?? '', $g->fund->name ?? '', number_format((float) $g->amount_awarded, 2), number_format((float) $g->amount_spent, 2), number_format($g->getAmountRemaining(), 2), $g->getUtilizationPercent() . '%', ucfirst($g->status)];
         }
 
-        \humhub\modules\stewardship\helpers\Export::download($format, 'grant-utilization', 'Grant Utilization Report', $headers, $data);
+        return \humhub\modules\stewardship\helpers\Export::download($format, 'grant-utilization', 'Grant Utilization Report', $headers, $data);
     }
 
     public function actionExportAuditTrail()
@@ -128,7 +128,7 @@ class ReportController extends ContentContainerController
             $data[] = [$log->created_at, $log->user->displayName ?? 'System', $log->action, $log->entity_type . ' #' . $log->entity_id, $log->field_changed ?? '', $log->old_value ?? '', $log->new_value ?? ''];
         }
 
-        \humhub\modules\stewardship\helpers\Export::download($format, 'audit-trail', 'Audit Trail', $headers, $data);
+        return \humhub\modules\stewardship\helpers\Export::download($format, 'audit-trail', 'Audit Trail', $headers, $data);
     }
 
     public function actionExportFundSummary()
@@ -142,6 +142,6 @@ class ReportController extends ContentContainerController
             $data[] = [$f->name, ucfirst(str_replace('_', ' ', $f->fund_type)), $f->restriction_purpose ?? '', number_format((float) $f->balance, 2), $f->is_active ? 'Active' : 'Inactive'];
         }
 
-        \humhub\modules\stewardship\helpers\Export::download($format, 'fund-summary', 'Fund Balance Summary', $headers, $data);
+        return \humhub\modules\stewardship\helpers\Export::download($format, 'fund-summary', 'Fund Balance Summary', $headers, $data);
     }
 }
