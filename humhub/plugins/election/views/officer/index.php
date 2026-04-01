@@ -16,6 +16,12 @@ $this->pageTitle = Yii::t('ElectionModule.base', 'Chapter Officers');
 <div class="panel panel-default">
     <div class="panel-heading">
         <strong><i class="fa fa-id-badge"></i> <?= Yii::t('ElectionModule.base', 'Chapter Officers') ?></strong>
+        <?php if ($canManage): ?>
+        <a href="<?= $contentContainer->createUrl('/election/election/index') ?>"
+           class="btn btn-default btn-sm pull-right">
+            <i class="fa fa-check-square-o"></i> <?= Yii::t('ElectionModule.base', 'Elections') ?>
+        </a>
+        <?php endif; ?>
     </div>
     <div class="panel-body">
         <?php if (empty($positions)): ?>
