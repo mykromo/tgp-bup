@@ -10,6 +10,7 @@ use humhub\modules\stewardship\models\Transaction;
 use humhub\modules\stewardship\models\AuditLog;
 use humhub\modules\space\models\Space;
 use Yii;
+use yii\data\Pagination;
 
 class ReportController extends ContentContainerController
 {
@@ -41,10 +42,12 @@ class ReportController extends ContentContainerController
      */
     public function actionGrantUtilization()
     {
-        $grants = Grant::find()->where(['space_id' => $this->contentContainer->id])->all();
+        $query = Grant::find()->where(['space_id' => $this->contentContainer->id]);
+        $pagination = new Pagination(['totalCount' => $query->count(), 'pageSize' => 20]);
 
         return $this->render('grant-utilization', [
-            'grants' => $grants,
+            'grants' => $query->offset($pagination->offset)->limit($pagination->limit)->all(),
+            'pagination' => $pagination,
             'contentContainer' => $this->contentContainer,
         ]);
     }
@@ -54,13 +57,14 @@ class ReportController extends ContentContainerController
      */
     public function actionAuditTrail()
     {
-        $logs = AuditLog::find()
+        $query = AuditLog::find()
             ->where(['space_id' => $this->contentContainer->id])
-            ->orderBy(['created_at' => SORT_DESC])
-            ->limit(100)->all();
+            ->orderBy(['created_at' => SORT_DESC]);
+        $pagination = new Pagination(['totalCount' => $query->count(), 'pageSize' => 25]);
 
         return $this->render('audit-trail', [
-            'logs' => $logs,
+            'logs' => $query->offset($pagination->offset)->limit($pagination->limit)->all(),
+            'pagination' => $pagination,
             'contentContainer' => $this->contentContainer,
         ]);
     }

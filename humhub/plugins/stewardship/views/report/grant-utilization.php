@@ -43,6 +43,7 @@ $cc = $contentContainer;
             </table>
         </div>
         <?php endif; ?>
+        <?= \yii\widgets\LinkPager::widget(['pagination' => $pagination]) ?>
         <a href="<?= $cc->createUrl('/stewardship/dashboard/index') ?>" class="btn btn-default"><i class="fa fa-arrow-left"></i> <?= Yii::t('StewardshipModule.base', 'Back') ?></a>
     </div>
 </div>

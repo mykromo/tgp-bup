@@ -9,6 +9,7 @@ use humhub\modules\stewardship\models\Transaction;
 use humhub\modules\stewardship\permissions\ManageFinances;
 use humhub\modules\space\models\Space;
 use Yii;
+use yii\data\Pagination;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 
@@ -98,7 +99,6 @@ class TransactionController extends ContentContainerController
 
     public function actionLedger()
     {
-        // Visible to all chapter members (read-only)
         $spaceId = $this->contentContainer->id;
         $fundId = Yii::$app->request->get('fund_id');
         $query = Transaction::find()->where(['space_id' => $spaceId])->orderBy(['transaction_date' => SORT_DESC, 'id' => SORT_DESC]);
@@ -106,8 +106,11 @@ class TransactionController extends ContentContainerController
             $query->andWhere(['fund_id' => $fundId]);
         }
 
+        $pagination = new Pagination(['totalCount' => $query->count(), 'pageSize' => 20]);
+
         return $this->render('ledger', [
-            'transactions' => $query->all(),
+            'transactions' => $query->offset($pagination->offset)->limit($pagination->limit)->all(),
+            'pagination' => $pagination,
             'funds' => Fund::find()->where(['space_id' => $spaceId])->all(),
             'categories' => \humhub\modules\stewardship\models\FunctionalCategory::getActiveMap($spaceId),
             'selectedFund' => $fundId,

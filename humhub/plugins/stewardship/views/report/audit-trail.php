@@ -30,5 +30,6 @@ $cc = $contentContainer;
 <?php endforeach; ?>
 </tbody></table></div>
 <?php endif; ?>
+<?= \yii\widgets\LinkPager::widget(['pagination' => $pagination]) ?>
 <a href="<?= $cc->createUrl('/stewardship/dashboard/index') ?>" class="btn btn-default"><i class="fa fa-arrow-left"></i> Back</a>
 </div></div>
