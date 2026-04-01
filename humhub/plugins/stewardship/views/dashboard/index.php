@@ -19,6 +19,8 @@ $cc = $contentContainer;
                 <i class="fa fa-plus"></i> <?= Yii::t('StewardshipModule.base', 'New Fund') ?></a>
             <a href="<?= $cc->createUrl('/stewardship/transaction/create') ?>" class="btn btn-success btn-sm">
                 <i class="fa fa-plus"></i> <?= Yii::t('StewardshipModule.base', 'New Transaction') ?></a>
+            <a href="<?= $cc->createUrl('/stewardship/category/index') ?>" class="btn btn-primary btn-sm">
+                <i class="fa fa-tags"></i> <?= Yii::t('StewardshipModule.base', 'Manage Categories') ?></a>
         </div>
         <?php endif; ?>
     </div>
@@ -47,10 +49,6 @@ $cc = $contentContainer;
                 <i class="fa fa-balance-scale"></i> <?= Yii::t('StewardshipModule.base', 'Fund Summary') ?></a>
             <a href="<?= $cc->createUrl('/stewardship/report/audit-trail') ?>" class="btn btn-default btn-sm">
                 <i class="fa fa-shield"></i> <?= Yii::t('StewardshipModule.base', 'Audit Trail') ?></a>
-            <?php if ($canManage): ?>
-            <a href="<?= $cc->createUrl('/stewardship/category/index') ?>" class="btn btn-default btn-sm">
-                <i class="fa fa-tags"></i> <?= Yii::t('StewardshipModule.base', 'Manage Categories') ?></a>
-            <?php endif; ?>
         </div>
 
         <!-- Active Grants -->
