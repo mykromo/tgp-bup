@@ -29,9 +29,9 @@ $cc = $contentContainer;
                     <td><?= Html::encode($g->grantor) ?></td>
                     <td><?= Html::encode($g->fund->name ?? '') ?></td>
                     <td><?= $g->start_date ? Yii::$app->formatter->asDate($g->start_date) . ' — ' . Yii::$app->formatter->asDate($g->end_date) : '—' ?></td>
-                    <td class="text-right"><?= Yii::$app->formatter->asCurrency($g->amount_awarded) ?></td>
-                    <td class="text-right"><?= Yii::$app->formatter->asCurrency($g->amount_spent) ?></td>
-                    <td class="text-right"><?= Yii::$app->formatter->asCurrency($g->getAmountRemaining()) ?></td>
+                    <td class="text-right"><?= \humhub\modules\stewardship\helpers\Currency::format($g->amount_awarded) ?></td>
+                    <td class="text-right"><?= \humhub\modules\stewardship\helpers\Currency::format($g->amount_spent) ?></td>
+                    <td class="text-right"><?= \humhub\modules\stewardship\helpers\Currency::format($g->getAmountRemaining()) ?></td>
                     <td><div class="progress" style="margin:0;min-width:60px">
                         <div class="progress-bar <?= $g->getUtilizationPercent() > 90 ? 'progress-bar-danger' : 'progress-bar-info' ?>"
                              style="width:<?= $g->getUtilizationPercent() ?>%"><?= $g->getUtilizationPercent() ?>%</div>

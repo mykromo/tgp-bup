@@ -41,7 +41,7 @@ $cc = $contentContainer;
                         <td><?= $t->functional_category ? ($categories[$t->functional_category] ?? ucfirst($t->functional_category)) : '' ?></td>
                         <td><?= Html::encode($t->description) ?></td>
                         <td><?= Html::encode($t->reference) ?></td>
-                        <td class="text-right"><?= Yii::$app->formatter->asCurrency($t->amount) ?></td>
+                        <td class="text-right"><?= \humhub\modules\stewardship\helpers\Currency::format($t->amount) ?></td>
                         <td><?= $t->is_voided ? '<span class="label label-danger">VOID</span>' : '<span class="label label-success">Active</span>' ?></td>
                     </tr>
                 <?php endforeach; ?>

@@ -28,12 +28,12 @@ foreach ($funds as $f) { $byType[$f->fund_type][] = $f; }
                     <tr>
                         <td><?= Html::encode($f->name) ?></td>
                         <td class="text-muted"><?= Html::encode($f->restriction_purpose ?: '—') ?></td>
-                        <td class="text-right"><?= Yii::$app->formatter->asCurrency($f->balance) ?></td>
+                        <td class="text-right"><?= \humhub\modules\stewardship\helpers\Currency::format($f->balance) ?></td>
                         <td><?= $f->is_active ? '<span class="label label-success">Active</span>' : '<span class="label label-default">Inactive</span>' ?></td>
                     </tr>
                     <?php endforeach; ?>
                     <tr class="active"><td colspan="2" class="text-right"><strong>Subtotal</strong></td>
-                        <td class="text-right"><strong><?= Yii::$app->formatter->asCurrency($subtotal) ?></strong></td><td></td></tr>
+                        <td class="text-right"><strong><?= \humhub\modules\stewardship\helpers\Currency::format($subtotal) ?></strong></td><td></td></tr>
                     </tbody>
                 </table>
             </div>

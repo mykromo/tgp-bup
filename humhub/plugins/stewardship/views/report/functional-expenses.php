@@ -31,14 +31,14 @@ foreach ($rows as $r) {
                     <tr>
                         <td><?= $categories[$cat] ?? ucfirst($cat) ?></td>
                         <td><?= Html::encode($prog) ?></td>
-                        <td class="text-right"><?= Yii::$app->formatter->asCurrency($total) ?></td>
+                        <td class="text-right"><?= \humhub\modules\stewardship\helpers\Currency::format($total) ?></td>
                     </tr>
                     <?php endforeach; ?>
                     <tr class="active"><td colspan="2" class="text-right"><strong><?= $categories[$cat] ?? ucfirst($cat) ?> Total</strong></td>
-                        <td class="text-right"><strong><?= Yii::$app->formatter->asCurrency($catTotal) ?></strong></td></tr>
+                        <td class="text-right"><strong><?= \humhub\modules\stewardship\helpers\Currency::format($catTotal) ?></strong></td></tr>
                 <?php endforeach; ?>
                 <tr class="info"><td colspan="2" class="text-right"><strong>Grand Total</strong></td>
-                    <td class="text-right"><strong><?= Yii::$app->formatter->asCurrency($grandTotal) ?></strong></td></tr>
+                    <td class="text-right"><strong><?= \humhub\modules\stewardship\helpers\Currency::format($grandTotal) ?></strong></td></tr>
                 </tbody>
             </table>
         </div>

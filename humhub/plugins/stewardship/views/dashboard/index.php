@@ -29,7 +29,7 @@ $cc = $contentContainer;
             <div class="col-sm-4">
                 <div class="panel panel-default text-center" style="padding:15px">
                     <h5><?= $label ?></h5>
-                    <h3><?= Yii::$app->formatter->asCurrency($totalByType[$type] ?? 0) ?></h3>
+                    <h3><?= \humhub\modules\stewardship\helpers\Currency::format($totalByType[$type] ?? 0) ?></h3>
                 </div>
             </div>
             <?php endforeach; ?>
@@ -69,9 +69,9 @@ $cc = $contentContainer;
                 <?php foreach ($grants as $g): ?>
                     <tr>
                         <td><?= Html::encode($g->name) ?></td>
-                        <td><?= Yii::$app->formatter->asCurrency($g->amount_awarded) ?></td>
-                        <td><?= Yii::$app->formatter->asCurrency($g->amount_spent) ?></td>
-                        <td><?= Yii::$app->formatter->asCurrency($g->getAmountRemaining()) ?></td>
+                        <td><?= \humhub\modules\stewardship\helpers\Currency::format($g->amount_awarded) ?></td>
+                        <td><?= \humhub\modules\stewardship\helpers\Currency::format($g->amount_spent) ?></td>
+                        <td><?= \humhub\modules\stewardship\helpers\Currency::format($g->getAmountRemaining()) ?></td>
                         <td>
                             <div class="progress" style="margin:0;min-width:80px">
                                 <div class="progress-bar <?= $g->getUtilizationPercent() > 90 ? 'progress-bar-danger' : 'progress-bar-info' ?>"
@@ -109,7 +109,7 @@ $cc = $contentContainer;
                         <td><span class="label label-<?= in_array($t->type, ['income','transfer_in']) ? 'success' : 'warning' ?>">
                             <?= Transaction::getTypeLabels()[$t->type] ?? $t->type ?></span></td>
                         <td><?= Html::encode($t->description) ?><?= $t->is_voided ? ' <span class="label label-danger">VOID</span>' : '' ?></td>
-                        <td class="text-right"><?= Yii::$app->formatter->asCurrency($t->amount) ?></td>
+                        <td class="text-right"><?= \humhub\modules\stewardship\helpers\Currency::format($t->amount) ?></td>
                     </tr>
                 <?php endforeach; ?>
                 </tbody>
