@@ -40,6 +40,45 @@ class TransactionController extends ContentContainerController
         ]);
     }
 
+    public function actionEdit($id)
+    {
+        if (!$this->contentContainer->permissionManager->can(ManageFinances::class)) {
+            throw new ForbiddenHttpException();
+        }
+
+        $model = Transaction::findOne(['id' => $id, 'space_id' => $this->contentContainer->id]);
+        if (!$model) throw new NotFoundHttpException();
+
+        if ($model->is_voided) {
+            throw new ForbiddenHttpException(Yii::t('StewardshipModule.base', 'Voided transactions cannot be edited.'));
+        }
+
+        $oldValues = $model->getAttributes(['amount', 'description', 'fund_id', 'functional_category', 'program_name', 'reference', 'transaction_date']);
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            // Log changes to audit trail
+            foreach ($oldValues as $field => $oldVal) {
+                $newVal = $model->$field;
+                if ((string) $oldVal !== (string) $newVal) {
+                    \humhub\modules\stewardship\models\AuditLog::log(
+                        $model->space_id, 'transaction', $model->id, 'updated', $field, $oldVal, $newVal
+                    );
+                }
+            }
+            $this->view->saved();
+            return $this->redirect($this->contentContainer->createUrl('/stewardship/transaction/ledger'));
+        }
+
+        $spaceId = $this->contentContainer->id;
+        return $this->render('form', [
+            'model' => $model,
+            'funds' => Fund::find()->where(['space_id' => $spaceId, 'is_active' => 1])->all(),
+            'grants' => Grant::find()->where(['space_id' => $spaceId, 'status' => 'active'])->all(),
+            'categories' => \humhub\modules\stewardship\models\FunctionalCategory::getActiveMap($spaceId),
+            'contentContainer' => $this->contentContainer,
+        ]);
+    }
+
     public function actionVoid($id)
     {
         if (!$this->contentContainer->permissionManager->can(ManageFinances::class)) {

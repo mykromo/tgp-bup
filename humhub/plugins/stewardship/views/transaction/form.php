@@ -3,7 +3,8 @@ use humhub\libs\Html;
 use humhub\modules\stewardship\models\Transaction;
 use yii\bootstrap\ActiveForm;
 use yii\helpers\ArrayHelper;
-$this->title = Yii::t('StewardshipModule.base', 'Record Transaction');
+$isNew = $model->isNewRecord;
+$this->title = $isNew ? Yii::t('StewardshipModule.base', 'Record Transaction') : Yii::t('StewardshipModule.base', 'Edit Transaction');
 ?>
 <div class="panel panel-default">
     <div class="panel-heading"><strong><?= $this->title ?></strong></div>
@@ -27,8 +28,8 @@ $this->title = Yii::t('StewardshipModule.base', 'Record Transaction');
         <?= $form->field($model, 'reference')->textInput(['maxlength' => 100])
             ->hint(Yii::t('StewardshipModule.base', 'Invoice #, check #, or receipt reference')) ?>
         <hr>
-        <?= Html::submitButton(Yii::t('StewardshipModule.base', 'Record Transaction'), ['class' => 'btn btn-primary']) ?>
-        <a href="<?= $contentContainer->createUrl('/stewardship/dashboard/index') ?>" class="btn btn-default"><?= Yii::t('StewardshipModule.base', 'Cancel') ?></a>
+        <?= Html::submitButton($isNew ? Yii::t('StewardshipModule.base', 'Record Transaction') : Yii::t('StewardshipModule.base', 'Save Changes'), ['class' => 'btn btn-primary']) ?>
+        <a href="<?= $contentContainer->createUrl($isNew ? '/stewardship/dashboard/index' : '/stewardship/transaction/ledger') ?>" class="btn btn-default"><?= Yii::t('StewardshipModule.base', 'Cancel') ?></a>
         <?php ActiveForm::end(); ?>
     </div>
 </div>

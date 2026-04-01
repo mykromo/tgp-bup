@@ -31,6 +31,7 @@ $cc = $contentContainer;
                     <th><?= Yii::t('StewardshipModule.base', 'Ref') ?></th>
                     <th class="text-right"><?= Yii::t('StewardshipModule.base', 'Amount') ?></th>
                     <th><?= Yii::t('StewardshipModule.base', 'Status') ?></th>
+                    <th></th>
                 </tr></thead>
                 <tbody>
                 <?php foreach ($transactions as $t): ?>
@@ -43,6 +44,11 @@ $cc = $contentContainer;
                         <td><?= Html::encode($t->reference) ?></td>
                         <td class="text-right"><?= \humhub\modules\stewardship\helpers\Currency::format($t->amount) ?></td>
                         <td><?= $t->is_voided ? '<span class="label label-danger">VOID</span>' : '<span class="label label-success">Active</span>' ?></td>
+                        <?php if (!$t->is_voided): ?>
+                        <td><a href="<?= $contentContainer->createUrl('/stewardship/transaction/edit', ['id' => $t->id]) ?>" class="btn btn-default btn-xs"><i class="fa fa-pencil"></i></a></td>
+                        <?php else: ?>
+                        <td></td>
+                        <?php endif; ?>
                     </tr>
                 <?php endforeach; ?>
                 </tbody>
