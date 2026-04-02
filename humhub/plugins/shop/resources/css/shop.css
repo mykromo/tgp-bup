@@ -185,41 +185,17 @@
 }
 
 /* ══════════════════════════════════════════
-   Store Profile (HumHub Space/Chapter layout)
-   Uses native panel-profile-header pattern
+   Store Profile — minimal overrides
+   Relies on HumHub native panel-profile-header,
+   profile-user-photo, statistics, etc.
    ══════════════════════════════════════════ */
 
-/* Banner / Cover area */
-.panel-profile .panel-profile-header { position: relative; overflow: hidden; }
-.panel-profile .store-banner-container { position: relative; height: 230px; overflow: hidden; }
-.panel-profile .store-banner-container .img-profile-header-background { width: 100%; height: 100%; object-fit: cover; display: block; }
-.panel-profile .store-banner-placeholder { width: 100%; height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; }
-.panel-profile .store-banner-placeholder i { font-size: 48px; color: rgba(255,255,255,.3); }
+/* Banner placeholder when no cover image */
+.store-banner-placeholder { width: 100%; height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
 
-/* Name overlay on banner (matches Space h1/h2 overlay) */
-.panel-profile .img-profile-data { position: absolute; bottom: 0; left: 0; right: 0; padding: 20px 20px 15px 140px; background: linear-gradient(transparent, rgba(0,0,0,.55)); }
-.panel-profile .img-profile-data h1 { color: #fff; font-size: 22px; font-weight: 700; margin: 0; text-shadow: 0 1px 4px rgba(0,0,0,.5); }
-.panel-profile .img-profile-data h1 a { color: #fff; text-decoration: none; }
-.panel-profile .img-profile-data h2 { color: rgba(255,255,255,.85); font-size: 13px; font-weight: 400; margin: 3px 0 0; text-shadow: 0 1px 3px rgba(0,0,0,.4); }
-
-/* Profile image / Logo (matches Space profile-user-photo) */
-.panel-profile .store-profile-image-container { position: absolute; bottom: -35px; left: 20px; z-index: 2; }
-.panel-profile .store-profile-image-container .profile-user-photo { width: 110px; height: 110px; border-radius: 3px; border: 3px solid #fff; object-fit: cover; background: #f5f5f5; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
-.panel-profile .store-profile-image-placeholder { width: 110px; height: 110px; border-radius: 3px; border: 3px solid #fff; background: #e8e8e8; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
-.panel-profile .store-profile-image-placeholder i { font-size: 40px; color: #bbb; }
-
-/* Controls bar (matches Space panel-profile-controls) */
-.panel-profile .panel-profile-controls { padding-top: 10px; }
-.panel-profile .panel-profile-controls .row { margin: 0; }
-
-/* Header counters (matches Space HeaderCounterSet) */
-.header-counter-set { display: inline-block; }
-.header-counter { display: inline-block; text-align: center; padding: 0 12px; border-right: 1px solid #e8e8e8; line-height: 1.2; }
-.header-counter:last-child { border-right: none; }
-.header-counter strong { display: block; font-size: 14px; color: #555; }
-.header-counter small { display: block; font-size: 11px; color: #999; }
-.header-counter a { color: inherit; text-decoration: none; }
-.header-counter a:hover strong { color: #337ab7; }
+/* Logo placeholder when no profile image */
+.store-profile-image-placeholder { width: 130px; height: 130px; border-radius: 3px; border: 3px solid #fff; background: #e8e8e8; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+.store-profile-image-placeholder i { font-size: 40px; color: #bbb; }
 
 /* Left navigation for store (matches Space left-navigation) */
 #store-main-menu .list-group-item { border-radius: 0; border-left: none; border-right: none; padding: 10px 15px; color: #555; font-size: 13px; }
@@ -231,30 +207,13 @@
 #store-main-menu .list-group-item.active { background: #f0f6ff; color: #337ab7; font-weight: 600; border-left: 3px solid #337ab7; }
 #store-main-menu .list-group-item.active i { color: #337ab7; }
 
-/* Responsive: stack nav on small screens */
-@media (max-width: 767px) {
-    .layout-nav-container { margin-bottom: 15px; }
-    .panel-profile .img-profile-data { padding-left: 20px; }
-    .panel-profile .store-profile-image-container { left: 10px; bottom: -25px; }
-    .panel-profile .store-profile-image-container .profile-user-photo,
-    .panel-profile .store-profile-image-placeholder { width: 80px; height: 80px; }
-}
-
 /* Dark mode store profile */
-[data-ui-theme="dark"] .panel-profile .store-banner-placeholder,
-.theme-dark .panel-profile .store-banner-placeholder { background: linear-gradient(135deg, #2a3a5c 0%, #3a2a5c 100%); }
-[data-ui-theme="dark"] .panel-profile .store-profile-image-container .profile-user-photo,
-.theme-dark .panel-profile .store-profile-image-container .profile-user-photo { border-color: #2b2b2b; background: #333; }
-[data-ui-theme="dark"] .panel-profile .store-profile-image-placeholder,
-.theme-dark .panel-profile .store-profile-image-placeholder { border-color: #2b2b2b; background: #3a3a3a; }
-[data-ui-theme="dark"] .panel-profile .store-profile-image-placeholder i,
-.theme-dark .panel-profile .store-profile-image-placeholder i { color: #666; }
-[data-ui-theme="dark"] .header-counter,
-.theme-dark .header-counter { border-color: #3a3a3a; }
-[data-ui-theme="dark"] .header-counter strong,
-.theme-dark .header-counter strong { color: #ccc; }
-[data-ui-theme="dark"] .header-counter small,
-.theme-dark .header-counter small { color: #888; }
+[data-ui-theme="dark"] .store-banner-placeholder,
+.theme-dark .store-banner-placeholder { background: linear-gradient(135deg, #2a3a5c 0%, #3a2a5c 100%); }
+[data-ui-theme="dark"] .store-profile-image-placeholder,
+.theme-dark .store-profile-image-placeholder { border-color: #2b2b2b; background: #3a3a3a; }
+[data-ui-theme="dark"] .store-profile-image-placeholder i,
+.theme-dark .store-profile-image-placeholder i { color: #666; }
 [data-ui-theme="dark"] #store-main-menu .list-group-item,
 .theme-dark #store-main-menu .list-group-item { color: #ccc; border-color: #3a3a3a; }
 [data-ui-theme="dark"] #store-main-menu .list-group-item:hover,

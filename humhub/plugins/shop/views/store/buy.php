@@ -5,6 +5,8 @@ use humhub\modules\shop\models\DeliveryAddress;
 $this->title = Yii::t('ShopModule.base', 'Checkout');
 $addresses = DeliveryAddress::getForUser($user->id);
 $defaultAddr = DeliveryAddress::getDefaultForUser($user->id);
+$paymentInstructions = $vendor ? $vendor->getPaymentInstructionsText() : ($settings->payment_instructions ?? '');
+$methodsList = $vendor ? $vendor->getMethodsList() : $settings->getMethodsList();
 ?>
 <div class="panel panel-default">
 <div class="panel-heading"><strong><i class="fa fa-credit-card"></i> <?= $this->title ?></strong></div>
@@ -14,12 +16,17 @@ $defaultAddr = DeliveryAddress::getDefaultForUser($user->id);
     <h4><?= Html::encode($product->name) ?></h4>
     <p class="text-muted"><?= Html::encode($product->description) ?></p>
     <h3 style="color:#337ab7"><?= $product->formatPrice() ?></h3>
+    <?php if ($vendor): ?>
+        <small class="text-muted"><i class="fa fa-shopping-bag"></i> <?= Html::encode($vendor->shop_name) ?></small>
+    <?php endif; ?>
 </div>
 
+<?php if ($paymentInstructions): ?>
 <div class="alert alert-info">
     <strong><i class="fa fa-info-circle"></i> Payment Instructions</strong><br>
-    <?= nl2br(Html::encode($settings->payment_instructions)) ?>
+    <?= nl2br(Html::encode($paymentInstructions)) ?>
 </div>
+<?php endif; ?>
 
 <?= Html::beginForm(Url::to(['/shop/store/buy', 'id' => $product->id]), 'post') ?>
 
@@ -60,7 +67,7 @@ $defaultAddr = DeliveryAddress::getDefaultForUser($user->id);
     <label>Payment Method <span class="text-danger">*</span></label>
     <select name="payment_method" class="form-control" required>
         <option value="">— Select —</option>
-        <?php foreach ($settings->getMethodsList() as $m): ?>
+        <?php foreach ($methodsList as $m): ?>
             <option value="<?= Html::encode($m) ?>"><?= Html::encode($m) ?></option>
         <?php endforeach; ?>
     </select>

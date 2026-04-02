@@ -8,7 +8,7 @@ $this->title = Html::encode($vendor->shop_name);
 <div class="container space-layout-container">
     <div class="row">
         <div class="col-md-12">
-            <?= $this->render('_store_header', ['vendor' => $vendor, 'activeTab' => $activeTab, 'isFavorited' => $isFavorited]) ?>
+            <?= $this->render('_store_header', ['vendor' => $vendor, 'activeTab' => $activeTab, 'isFollowing' => $isFollowing]) ?>
         </div>
     </div>
     <div class="row space-content">

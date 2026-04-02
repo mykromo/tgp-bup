@@ -4,15 +4,12 @@ namespace humhub\modules\shop\controllers;
 
 use humhub\modules\admin\components\Controller;
 use humhub\modules\shop\models\Order;
-use humhub\modules\shop\models\PaymentSetting;
 use humhub\modules\shop\models\Product;
-use humhub\modules\shop\models\ProductImage;
 use humhub\modules\shop\models\Vendor;
 use Yii;
 use yii\data\Pagination;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
-use yii\web\UploadedFile;
 
 class AdminController extends Controller
 {
@@ -306,9 +303,8 @@ class AdminController extends Controller
     public function actionSettings()
     {
         $this->requireAdmin();
-        $model = PaymentSetting::getGlobal();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if (Yii::$app->request->isPost) {
             $cacheTtl = max(0, min(86400, (int) Yii::$app->request->post('cacheTtl', 300)));
             Yii::$app->getModule('shop')->settings->set('cacheTtl', $cacheTtl);
             \humhub\modules\shop\helpers\ShopCache::flushAll();
@@ -316,6 +312,6 @@ class AdminController extends Controller
             return $this->redirect(['/shop/admin/settings']);
         }
 
-        return $this->render('settings', ['model' => $model]);
+        return $this->render('settings');
     }
 }

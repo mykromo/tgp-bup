@@ -22,7 +22,8 @@ class Vendor extends ActiveRecord
             [['user_id', 'shop_name'], 'required'],
             [['user_id', 'reviewed_by'], 'integer'],
             [['shop_name'], 'string', 'max' => 255],
-            [['description', 'rejection_reason'], 'string'],
+            [['description', 'rejection_reason', 'payment_instructions'], 'string'],
+            [['accepted_methods'], 'string', 'max' => 500],
             [['status'], 'in', 'range' => [self::STATUS_PENDING, self::STATUS_APPROVED, self::STATUS_REJECTED, self::STATUS_SUSPENDED]],
             [['reviewed_at'], 'safe'],
         ];
@@ -94,5 +95,26 @@ class Vendor extends ActiveRecord
             'business_permit' => Yii::t('ShopModule.base', 'Business Permit / DTI Registration'),
             'proof_of_address' => Yii::t('ShopModule.base', 'Proof of Address'),
         ];
+    }
+
+    public function getMethodsList(): array
+    {
+        $methods = $this->accepted_methods ?: 'GCash,Bank Transfer,Cash';
+        return array_map('trim', explode(',', $methods));
+    }
+
+    public function getPaymentInstructionsText(): string
+    {
+        return $this->payment_instructions ?: "Please send payment via GCash, bank transfer, or cash.\nInclude your Order Number as reference.\nOnce paid, submit your payment reference number.";
+    }
+
+    public function getFollowerCount(): int
+    {
+        return (int) FavoriteStore::find()->where(['vendor_id' => $this->id])->count();
+    }
+
+    public function getActiveProductCount(): int
+    {
+        return (int) $this->getProducts()->where(['is_active' => 1])->count();
     }
 }

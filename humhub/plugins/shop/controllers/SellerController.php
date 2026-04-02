@@ -52,6 +52,8 @@ class SellerController extends Controller
             $vendor->tagline = Yii::$app->request->post('tagline', '');
             $vendor->description = Yii::$app->request->post('description', '');
             $vendor->location = Yii::$app->request->post('location', '');
+            $vendor->payment_instructions = Yii::$app->request->post('payment_instructions', '');
+            $vendor->accepted_methods = Yii::$app->request->post('accepted_methods', '');
 
             // Handle logo upload
             $logo = \yii\web\UploadedFile::getInstanceByName('logo');

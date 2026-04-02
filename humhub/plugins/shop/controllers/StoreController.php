@@ -103,6 +103,7 @@ class StoreController extends Controller
         }
 
         $settings = PaymentSetting::getGlobal();
+        $vendor = $product->vendor;
         $user = Yii::$app->user->getIdentity();
 
         if (Yii::$app->request->isPost && Yii::$app->request->post('confirm')) {
@@ -169,6 +170,7 @@ class StoreController extends Controller
         return $this->render('buy', [
             'product' => $product,
             'settings' => $settings,
+            'vendor' => $vendor,
             'user' => $user,
         ]);
     }
@@ -344,13 +346,19 @@ class StoreController extends Controller
         return ['wishlisted' => $added];
     }
 
-    public function actionToggleFavorite($vendorId)
+    public function actionToggleFollow($vendorId)
     {
         if (Yii::$app->user->isGuest) return $this->redirect(Yii::$app->user->loginUrl);
         if (Yii::$app->user->isAdmin()) return $this->asJson(['error' => 'Admin accounts cannot use shop features.']);
         Yii::$app->response->format = 'json';
         $added = FavoriteStore::toggle(Yii::$app->user->id, (int) $vendorId);
-        return ['favorited' => $added];
+        return ['following' => $added];
+    }
+
+    // Keep old action for backward compat
+    public function actionToggleFavorite($vendorId)
+    {
+        return $this->actionToggleFollow($vendorId);
     }
 
     public function actionWishlist()
@@ -378,7 +386,7 @@ class StoreController extends Controller
         $categoryFilter = Yii::$app->request->get('category');
         $sort = Yii::$app->request->get('sort', 'default');
         $keyword = Yii::$app->request->get('q');
-        $isFavorited = (!Yii::$app->user->isGuest && !Yii::$app->user->isAdmin())
+        $isFollowing = (!Yii::$app->user->isGuest && !Yii::$app->user->isAdmin())
             ? FavoriteStore::isFavorited(Yii::$app->user->id, $vendor->id) : false;
 
         $productQuery = Product::find()->where(['vendor_id' => $vendor->id, 'is_active' => 1]);
@@ -410,7 +418,7 @@ class StoreController extends Controller
             'products' => $products,
             'categories' => $categories,
             'activeTab' => $tab,
-            'isFavorited' => $isFavorited,
+            'isFollowing' => $isFollowing,
             'sort' => $sort,
             'keyword' => $keyword,
             'categoryFilter' => $categoryFilter,

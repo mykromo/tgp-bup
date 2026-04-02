@@ -26,6 +26,20 @@ $this->title = Yii::t('ShopModule.base', 'Edit Store Profile');
 </div>
 
 <hr>
+<h4><i class="fa fa-credit-card"></i> Payment Configuration</h4>
+
+<div class="form-group">
+    <label>Payment Instructions</label>
+    <textarea name="payment_instructions" class="form-control" rows="4" placeholder="Instructions shown to buyers during checkout..."><?= Html::encode($vendor->payment_instructions) ?></textarea>
+    <p class="help-block">Displayed to buyers at checkout. Include bank details, GCash number, etc.</p>
+</div>
+<div class="form-group">
+    <label>Accepted Payment Methods</label>
+    <input type="text" name="accepted_methods" value="<?= Html::encode($vendor->accepted_methods) ?>" class="form-control" maxlength="500" placeholder="GCash,Bank Transfer,Cash,PayMaya">
+    <p class="help-block">Comma-separated list of payment methods you accept.</p>
+</div>
+
+<hr>
 <h4><i class="fa fa-image"></i> Store Images</h4>
 
 <div class="row">
@@ -36,7 +50,7 @@ $this->title = Yii::t('ShopModule.base', 'Edit Store Profile');
                 <div style="margin-bottom:8px"><img src="<?= Yii::getAlias('@web') . '/' . $vendor->logo_path ?>" style="max-height:80px;border-radius:50%;border:2px solid #ddd"></div>
             <?php endif; ?>
             <input type="file" name="logo" accept=".jpg,.jpeg,.png,.webp" class="form-control">
-            <p class="help-block">Square image recommended. Max 2MB. Resized to 400x400.</p>
+            <p class="help-block">Square image recommended. Max 2MB.</p>
         </div>
     </div>
     <div class="col-sm-6">

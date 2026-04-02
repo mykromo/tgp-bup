@@ -13,7 +13,7 @@ $this->title = Yii::t('ShopModule.base', 'Shop');
                 <a href="<?= Url::to(['/shop/store/my-orders']) ?>" class="btn btn-default btn-sm"><i class="fa fa-list"></i> My Orders</a>
                 <a href="<?= Url::to(['/shop/address/index']) ?>" class="btn btn-default btn-sm"><i class="fa fa-map-marker"></i> Addresses</a>
                 <a href="<?= Url::to(['/shop/store/wishlist']) ?>" class="btn btn-default btn-sm"><i class="fa fa-heart"></i> Wishlist</a>
-                <a href="<?= Url::to(['/shop/store/favorites']) ?>" class="btn btn-default btn-sm"><i class="fa fa-star"></i> Favorites</a>
+                <a href="<?= Url::to(['/shop/store/favorites']) ?>" class="btn btn-default btn-sm"><i class="fa fa-users"></i> Following</a>
                 <?php if ($isVendor && $isVendor->isApproved()): ?>
                     <a href="<?= Url::to(['/shop/seller/dashboard']) ?>" class="btn btn-default btn-sm"><i class="fa fa-cube"></i> My Shop</a>
                 <?php elseif ($isVendor && $isVendor->status === 'suspended'): ?>
