@@ -1,0 +1,7 @@
+{
+    "id": "shop",
+    "name": "Chapter Shop",
+    "description": "E-commerce module with manual payment for chapters. Sell products, collect payment references, and manage orders.",
+    "keywords": ["shop", "ecommerce", "store", "payment", "order", "product"],
+    "version": "1.0.0"
+}
