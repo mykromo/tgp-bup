@@ -25,10 +25,13 @@ humhub\assets\CardsAsset::register($this);
             $coverUrl = $v->cover_path ? Yii::getAlias('@web') . '/' . $v->cover_path : '';
             $storeUrl = Url::to(['/shop/store/vendor-store', 'id' => $v->id]);
             $followerCount = $v->getFollowerCount();
+            $coverStyle = $coverUrl
+                ? 'background-image:url(\'' . Html::encode($coverUrl) . '\');background-size:cover;background-position:center'
+                : 'background:linear-gradient(135deg,#667eea 0%,#764ba2 100%)';
         ?>
-        <div class="card card-space col-lg-4 col-md-6 col-sm-6 col-xs-12">
+        <div class="card card-space col-lg-3 col-md-4 col-sm-6 col-xs-12">
             <div class="card-panel<?= $v->status === Vendor::STATUS_SUSPENDED ? ' card-archived' : '' ?>">
-                <div class="card-bg-image" <?= $coverUrl ? 'style="background-image:url(\'' . Html::encode($coverUrl) . '\')"' : '' ?>></div>
+                <div class="card-bg-image" style="<?= $coverStyle ?>"></div>
                 <div class="card-header">
                     <a href="<?= $storeUrl ?>" class="card-image-link">
                         <?php if ($logoUrl): ?>
