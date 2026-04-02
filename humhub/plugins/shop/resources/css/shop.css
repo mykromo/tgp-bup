@@ -196,7 +196,10 @@
 /* Logo placeholder when no profile image — uses inline background color from model */
 .store-profile-image-placeholder { width: 130px; height: 130px; border-radius: 4px; border: 3px solid #fff; background: #34295e; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
 
-/* Image upload buttons — rely on HumHub native .image-upload-buttons positioning */
+/* Image upload buttons — pure CSS hover show/hide */
+.store-img-btns { opacity: 0; transition: opacity .2s; }
+.profile-banner-image-container:hover .store-img-btns,
+.profile-user-photo-container:hover .store-img-btns { opacity: 1; }
 
 /* Store directory cards — visible against panel background */
 .panel-body .card.card-space .card-panel { border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,.08); background: #fff; }

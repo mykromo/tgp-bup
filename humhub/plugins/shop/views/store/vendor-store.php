@@ -103,6 +103,7 @@ $this->title = Html::encode($vendor->shop_name);
                         <?= $this->render('_product_card', ['p' => $p]) ?>
                     <?php endforeach; ?>
                 </div>
+                <?= \yii\widgets\LinkPager::widget(['pagination' => $pagination]) ?>
             <?php endif; ?>
 
 <?php endif; ?>

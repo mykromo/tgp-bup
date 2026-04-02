@@ -23,7 +23,7 @@ $pw = 140; $ph = 140;
 </div>
 
 <?php if ($isOwner): ?>
-<div class="image-upload-buttons" style="display:none" id="cover-btns">
+<div class="image-upload-buttons store-img-btns">
 <?= Html::beginForm(Url::to(['/shop/seller/upload-cover']), 'post', ['enctype' => 'multipart/form-data', 'style' => 'display:inline']) ?>
 <label class="btn btn-info btn-sm profile-image-upload" style="margin:0;cursor:pointer" title="Upload cover"><i class="fa fa-cloud-upload"></i>
 <input type="file" name="cover" accept=".jpg,.jpeg,.png,.webp" style="display:none" onchange="this.form.submit()"></label>
@@ -43,7 +43,7 @@ $pw = 140; $ph = 140;
 </div>
 <?php endif; ?>
 <?php if ($isOwner): ?>
-<div class="image-upload-buttons" style="display:none" id="logo-btns">
+<div class="image-upload-buttons store-img-btns">
 <?= Html::beginForm(Url::to(['/shop/seller/upload-logo']), 'post', ['enctype' => 'multipart/form-data', 'style' => 'display:inline']) ?>
 <label class="btn btn-info btn-sm profile-image-upload" style="margin:0;cursor:pointer" title="Upload logo"><i class="fa fa-cloud-upload"></i>
 <input type="file" name="logo" accept=".jpg,.jpeg,.png,.webp" style="display:none" onchange="this.form.submit()"></label>
@@ -84,13 +84,4 @@ $pw = 140; $ph = 140;
 <span><i class="fa fa-shield"></i> Viewing as administrator for investigation.</span>
 <a href="<?= Url::to(['/shop/admin/stores']) ?>" class="btn btn-default btn-sm"><i class="fa fa-arrow-left"></i> Back to Admin</a>
 </div>
-<?php endif; ?>
-<?php if ($isOwner): ?>
-<script>
-(function(){
-var c=document.getElementById('cover-btns'),l=document.getElementById('logo-btns');
-if(c){var cp=c.parentNode;cp.onmouseenter=function(){c.style.display=''};cp.onmouseleave=function(){c.style.display='none'}}
-if(l){var lp=l.parentNode;lp.onmouseenter=function(){l.style.display=''};lp.onmouseleave=function(){l.style.display='none'}}
-})();
-</script>
 <?php endif; ?>

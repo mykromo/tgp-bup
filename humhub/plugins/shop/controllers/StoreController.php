@@ -395,16 +395,20 @@ class StoreController extends Controller
     {
         if (Yii::$app->user->isGuest) return $this->redirect(Yii::$app->user->loginUrl);
         if (Yii::$app->user->isAdmin()) return $this->redirect(['/shop/admin/index']);
-        $items = Wishlist::find()->where(['user_id' => Yii::$app->user->id])->with('product')->orderBy(['created_at' => SORT_DESC])->all();
-        return $this->render('wishlist', ['items' => $items]);
+        $query = Wishlist::find()->where(['user_id' => Yii::$app->user->id])->with('product')->orderBy(['created_at' => SORT_DESC]);
+        $pagination = new Pagination(['totalCount' => $query->count(), 'pageSize' => 20]);
+        $items = $query->offset($pagination->offset)->limit($pagination->limit)->all();
+        return $this->render('wishlist', ['items' => $items, 'pagination' => $pagination]);
     }
 
     public function actionFavorites()
     {
         if (Yii::$app->user->isGuest) return $this->redirect(Yii::$app->user->loginUrl);
         if (Yii::$app->user->isAdmin()) return $this->redirect(['/shop/admin/index']);
-        $items = FavoriteStore::find()->where(['user_id' => Yii::$app->user->id])->with('vendor')->orderBy(['created_at' => SORT_DESC])->all();
-        return $this->render('favorites', ['items' => $items]);
+        $query = FavoriteStore::find()->where(['user_id' => Yii::$app->user->id])->with('vendor')->orderBy(['created_at' => SORT_DESC]);
+        $pagination = new Pagination(['totalCount' => $query->count(), 'pageSize' => 20]);
+        $items = $query->offset($pagination->offset)->limit($pagination->limit)->all();
+        return $this->render('favorites', ['items' => $items, 'pagination' => $pagination]);
     }
 
     public function actionVendorStore($id)
@@ -443,7 +447,8 @@ class StoreController extends Controller
             default: $productQuery->orderBy(['sort_order' => SORT_ASC]); break;
         }
 
-        $products = $productQuery->all();
+        $pagination = new Pagination(['totalCount' => $productQuery->count(), 'pageSize' => 12]);
+        $products = $productQuery->offset($pagination->offset)->limit($pagination->limit)->all();
         $categories = Category::find()->where(['is_active' => 1])->orderBy(['sort_order' => SORT_ASC])->all();
 
         return $this->render('vendor-store', [
@@ -455,6 +460,7 @@ class StoreController extends Controller
             'sort' => $sort,
             'keyword' => $keyword,
             'categoryFilter' => $categoryFilter,
+            'pagination' => $pagination,
         ]);
     }
 }

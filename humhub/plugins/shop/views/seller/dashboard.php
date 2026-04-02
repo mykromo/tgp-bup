@@ -45,6 +45,7 @@ $this->title = Yii::t('ShopModule.base', 'Seller Dashboard');
 </tr>
 <?php endforeach; ?>
 </tbody></table></div>
+<?= \yii\widgets\LinkPager::widget(['pagination' => $pagination]) ?>
 <?php endif; ?>
 <a href="<?= Url::to(['/shop/store/vendor-store', 'id' => $vendor->id]) ?>" class="btn btn-default"><i class="fa fa-eye"></i> View Store</a>
 <a href="<?= Url::to(['/shop/store/index']) ?>" class="btn btn-default"><i class="fa fa-arrow-left"></i> Back to Shop</a>

@@ -31,6 +31,7 @@ $this->title = 'Change Requests';
     </div>
 </div>
 <?php endforeach; ?>
+<?= \yii\widgets\LinkPager::widget(['pagination' => $pagination]) ?>
 <?php endif; ?>
 <a href="<?= Url::to(['/shop/seller/dashboard']) ?>" class="btn btn-default"><i class="fa fa-arrow-left"></i> Back</a>
 </div></div>

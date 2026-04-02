@@ -36,6 +36,7 @@ $this->title = Yii::t('ShopModule.base', 'Following');
 </div>
 <?php endforeach; ?>
 </div>
+<?= \yii\widgets\LinkPager::widget(['pagination' => $pagination]) ?>
 <?php endif; ?>
 <a href="<?= Url::to(['/shop/store/index']) ?>" class="btn btn-default"><i class="fa fa-arrow-left"></i> Back to Shop</a>
 </div></div>

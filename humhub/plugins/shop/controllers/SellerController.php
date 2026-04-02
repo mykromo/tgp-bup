@@ -34,13 +34,10 @@ class SellerController extends Controller
     public function actionDashboard()
     {
         $vendor = $this->getVendor();
-        try {
-            $products = Product::find()->where(['vendor_id' => $vendor->id])->orderBy(['sort_order' => SORT_ASC])->all();
-        } catch (\Throwable $e) {
-            $products = [];
-            Yii::error('Seller dashboard product query failed: ' . $e->getMessage(), 'shop');
-        }
-        return $this->render('dashboard', ['vendor' => $vendor, 'products' => $products]);
+        $query = Product::find()->where(['vendor_id' => $vendor->id])->orderBy(['sort_order' => SORT_ASC]);
+        $pagination = new \yii\data\Pagination(['totalCount' => $query->count(), 'pageSize' => 20]);
+        $products = $query->offset($pagination->offset)->limit($pagination->limit)->all();
+        return $this->render('dashboard', ['vendor' => $vendor, 'products' => $products, 'pagination' => $pagination]);
     }
 
     public function actionEditStore()
@@ -307,8 +304,10 @@ class SellerController extends Controller
     public function actionDiscounts()
     {
         $vendor = $this->getVendor();
-        $discounts = Discount::find()->where(['vendor_id' => $vendor->id])->all();
-        return $this->render('discounts', ['discounts' => $discounts]);
+        $query = Discount::find()->where(['vendor_id' => $vendor->id])->orderBy(['id' => SORT_DESC]);
+        $pagination = new \yii\data\Pagination(['totalCount' => $query->count(), 'pageSize' => 20]);
+        $discounts = $query->offset($pagination->offset)->limit($pagination->limit)->all();
+        return $this->render('discounts', ['discounts' => $discounts, 'pagination' => $pagination]);
     }
 
     public function actionCreateDiscount()
@@ -433,9 +432,12 @@ class SellerController extends Controller
 
         if ($status) $query->andWhere(['shop_order.status' => $status]);
 
+        $pagination = new \yii\data\Pagination(['totalCount' => $query->count(), 'pageSize' => 20]);
+
         return $this->render('orders', [
-            'orders' => $query->all(),
+            'orders' => $query->offset($pagination->offset)->limit($pagination->limit)->all(),
             'selectedStatus' => $status,
+            'pagination' => $pagination,
         ]);
     }
 
@@ -517,15 +519,19 @@ class SellerController extends Controller
     public function actionRequests()
     {
         $vendor = $this->getVendor();
-        $requests = \humhub\modules\shop\models\OrderRequest::find()
+        $query = \humhub\modules\shop\models\OrderRequest::find()
             ->innerJoin('shop_order', 'shop_order.id = shop_order_request.order_id')
             ->innerJoin('shop_order_item', 'shop_order_item.order_id = shop_order.id')
             ->innerJoin('shop_product', 'shop_product.id = shop_order_item.product_id')
             ->where(['shop_product.vendor_id' => $vendor->id, 'shop_order_request.status' => 'pending'])
-            ->orderBy(['shop_order_request.created_at' => SORT_DESC])
-            ->all();
+            ->orderBy(['shop_order_request.created_at' => SORT_DESC]);
 
-        return $this->render('requests', ['requests' => $requests]);
+        $pagination = new \yii\data\Pagination(['totalCount' => $query->count(), 'pageSize' => 20]);
+
+        return $this->render('requests', [
+            'requests' => $query->offset($pagination->offset)->limit($pagination->limit)->all(),
+            'pagination' => $pagination,
+        ]);
     }
 
     public function actionApproveRequest($id)
