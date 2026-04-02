@@ -11,7 +11,6 @@ $this->title = Yii::t('ShopModule.base', 'Seller Dashboard');
         <a href="<?= Url::to(['/shop/seller/orders']) ?>" class="btn btn-default btn-sm"><i class="fa fa-list"></i> <?= Yii::t('ShopModule.base', 'Orders') ?></a>
         <a href="<?= Url::to(['/shop/seller/requests']) ?>" class="btn btn-default btn-sm"><i class="fa fa-exchange"></i> <?= Yii::t('ShopModule.base', 'Requests') ?></a>
         <a href="<?= Url::to(['/shop/seller/discounts']) ?>" class="btn btn-default btn-sm"><i class="fa fa-tag"></i> <?= Yii::t('ShopModule.base', 'Discounts') ?></a>
-        <a href="<?= Url::to(['/shop/seller/edit-store']) ?>" class="btn btn-default btn-sm"><i class="fa fa-pencil"></i> <?= Yii::t('ShopModule.base', 'Edit Store') ?></a>
     </div>
 </div>
 <div class="panel-body">

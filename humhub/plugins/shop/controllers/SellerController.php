@@ -97,6 +97,95 @@ class SellerController extends Controller
         return null;
     }
 
+    /**
+     * AJAX upload logo from store profile page.
+     */
+    public function actionUploadLogo()
+    {
+        $vendor = $this->getVendor();
+        $this->forcePostRequest();
+        $file = UploadedFile::getInstanceByName('logo');
+        if (!$file) {
+            Yii::$app->session->setFlash('error', Yii::t('ShopModule.base', 'No file uploaded.'));
+            return $this->redirect(['/shop/store/vendor-store', 'id' => $vendor->id]);
+        }
+        $path = $this->uploadStoreImage($file, $vendor->id, 'logo');
+        if (!$path) {
+            Yii::$app->session->setFlash('error', Yii::t('ShopModule.base', 'Invalid file. Max 2MB, JPG/PNG/WebP only.'));
+            return $this->redirect(['/shop/store/vendor-store', 'id' => $vendor->id]);
+        }
+        if ($vendor->logo_path) {
+            $old = Yii::getAlias('@webroot') . '/' . $vendor->logo_path;
+            if (file_exists($old)) @unlink($old);
+        }
+        $vendor->logo_path = $path;
+        $vendor->save(false);
+        \humhub\modules\shop\helpers\ShopCache::invalidateVendor($vendor->id);
+        Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Logo updated.'));
+        return $this->redirect(['/shop/store/vendor-store', 'id' => $vendor->id]);
+    }
+
+    public function actionUploadCover()
+    {
+        $vendor = $this->getVendor();
+        $this->forcePostRequest();
+        $file = UploadedFile::getInstanceByName('cover');
+        if (!$file) {
+            Yii::$app->session->setFlash('error', Yii::t('ShopModule.base', 'No file uploaded.'));
+            return $this->redirect(['/shop/store/vendor-store', 'id' => $vendor->id]);
+        }
+        $path = $this->uploadStoreImage($file, $vendor->id, 'cover');
+        if (!$path) {
+            Yii::$app->session->setFlash('error', Yii::t('ShopModule.base', 'Invalid file. Max 2MB, JPG/PNG/WebP only.'));
+            return $this->redirect(['/shop/store/vendor-store', 'id' => $vendor->id]);
+        }
+        if ($vendor->cover_path) {
+            $old = Yii::getAlias('@webroot') . '/' . $vendor->cover_path;
+            if (file_exists($old)) @unlink($old);
+        }
+        $vendor->cover_path = $path;
+        $vendor->save(false);
+        \humhub\modules\shop\helpers\ShopCache::invalidateVendor($vendor->id);
+        Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Cover photo updated.'));
+        return $this->redirect(['/shop/store/vendor-store', 'id' => $vendor->id]);
+    }
+
+    /**
+     * Delete logo from store profile.
+     */
+    public function actionDeleteLogo()
+    {
+        $vendor = $this->getVendor();
+        $this->forcePostRequest();
+        if ($vendor->logo_path) {
+            $full = Yii::getAlias('@webroot') . '/' . $vendor->logo_path;
+            if (file_exists($full)) @unlink($full);
+            $vendor->logo_path = null;
+            $vendor->save(false);
+            \humhub\modules\shop\helpers\ShopCache::invalidateVendor($vendor->id);
+        }
+        Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Logo deleted.'));
+        return $this->redirect(['/shop/store/vendor-store', 'id' => $vendor->id]);
+    }
+
+    /**
+     * Delete cover from store profile.
+     */
+    public function actionDeleteCover()
+    {
+        $vendor = $this->getVendor();
+        $this->forcePostRequest();
+        if ($vendor->cover_path) {
+            $full = Yii::getAlias('@webroot') . '/' . $vendor->cover_path;
+            if (file_exists($full)) @unlink($full);
+            $vendor->cover_path = null;
+            $vendor->save(false);
+            \humhub\modules\shop\helpers\ShopCache::invalidateVendor($vendor->id);
+        }
+        Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Cover photo deleted.'));
+        return $this->redirect(['/shop/store/vendor-store', 'id' => $vendor->id]);
+    }
+
     public function actionCreateProduct()
     {
         $vendor = $this->getVendor();

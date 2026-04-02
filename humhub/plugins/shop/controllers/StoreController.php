@@ -392,8 +392,11 @@ class StoreController extends Controller
         $productQuery = Product::find()->where(['vendor_id' => $vendor->id, 'is_active' => 1]);
 
         if ($tab === 'sale') {
+            $now = date('Y-m-d H:i:s');
             $productQuery->andWhere(['not', ['sale_price' => null]])
-                ->andWhere(['<', 'sale_price', new \yii\db\Expression('price')]);
+                ->andWhere(['<', 'sale_price', new \yii\db\Expression('price')])
+                ->andWhere(['or', ['sale_start' => null], ['<=', 'sale_start', $now]])
+                ->andWhere(['or', ['sale_end' => null], ['>=', 'sale_end', $now]]);
         }
         if ($categoryFilter) {
             $productQuery->andWhere(['category_id' => $categoryFilter]);

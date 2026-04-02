@@ -13,11 +13,6 @@ use yii\web\NotFoundHttpException;
 
 class AdminController extends Controller
 {
-    /**
-     * Use the admin layout so this appears inside the Administration section.
-     */
-    public $subLayout = '@shop/views/admin/layout';
-
     public function init()
     {
         parent::init();

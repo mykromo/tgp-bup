@@ -1,18 +1,14 @@
 <?php
-
 use humhub\modules\admin\widgets\AdminMenu;
 use yii\helpers\Url;
 
 AdminMenu::markAsActive('shop');
-
 $actionId = $this->context->action->id;
 ?>
-
 <div class="panel panel-default">
     <div class="panel-heading">
         <?= Yii::t('ShopModule.base', '<strong>Shop</strong> Administration') ?>
     </div>
-
     <div class="tab-menu">
         <ul class="nav nav-tabs">
             <li <?= $actionId === 'index' ? 'class="active"' : '' ?>>
@@ -35,6 +31,5 @@ $actionId = $this->context->action->id;
             </li>
         </ul>
     </div>
-
     <?= $content ?>
 </div>
