@@ -13,13 +13,7 @@ use yii\web\UploadedFile;
 
 class VendorController extends Controller
 {
-    public function init()
-    {
-        parent::init();
-        if ($this->module) {
-            $this->subLayout = $this->module->getBasePath() . '/views/layouts/main';
-        }
-    }
+    
 
     /**
      * Apply to become a vendor — any logged-in user

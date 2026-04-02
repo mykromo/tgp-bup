@@ -17,13 +17,7 @@ use yii\web\UploadedFile;
 
 class SellerController extends Controller
 {
-    public function init()
-    {
-        parent::init();
-        if ($this->module) {
-            $this->subLayout = $this->module->getBasePath() . '/views/layouts/main';
-        }
-    }
+    
 
     private function getVendor(): Vendor
     {

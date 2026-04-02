@@ -17,13 +17,7 @@ use yii\web\NotFoundHttpException;
 
 class StoreController extends Controller
 {
-    public function init()
-    {
-        parent::init();
-        if ($this->module) {
-            $this->subLayout = $this->module->getBasePath() . '/views/layouts/main';
-        }
-    }
+    
 
     public function actionIndex()
     {

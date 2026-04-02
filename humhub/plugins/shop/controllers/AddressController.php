@@ -10,13 +10,7 @@ use yii\web\NotFoundHttpException;
 
 class AddressController extends Controller
 {
-    public function init()
-    {
-        parent::init();
-        if ($this->module) {
-            $this->subLayout = $this->module->getBasePath() . '/views/layouts/main';
-        }
-    }
+    
 
     public function actionIndex()
     {
