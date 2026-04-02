@@ -20,7 +20,9 @@ class StoreController extends Controller
     public function init()
     {
         parent::init();
-        $this->subLayout = Yii::$app->getModule('shop')->getBasePath() . '/views/layouts/main';
+        if ($this->module) {
+            $this->subLayout = $this->module->getBasePath() . '/views/layouts/main';
+        }
     }
 
     public function actionIndex()
