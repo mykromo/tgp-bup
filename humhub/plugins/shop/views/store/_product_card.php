@@ -55,7 +55,7 @@ $wishlisted = $uid ? Wishlist::isWishlisted($uid, $p->id) : false;
         <?php else: ?>
             <span class="label label-danger">Sold Out</span>
         <?php endif; ?>
-        <?php if ($uid): ?>
+        <?php if ($uid && !Yii::$app->user->isAdmin()): ?>
             <a href="#" class="shop-wishlist-btn <?= $wishlisted ? 'active' : '' ?>" data-url="<?= Url::to(['/shop/store/toggle-wishlist', 'productId' => $p->id]) ?>">
                 <i class="fa fa-heart<?= $wishlisted ? '' : '-o' ?>"></i>
             </a>

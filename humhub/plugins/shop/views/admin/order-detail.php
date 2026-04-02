@@ -2,18 +2,19 @@
 use humhub\libs\Html;
 use humhub\modules\shop\models\Order;
 use yii\helpers\Url;
-$this->title = Yii::t('ShopModule.base', 'Order') . ' ' . $order->order_number;
 ?>
-<div class="panel panel-default">
-<div class="panel-heading">
-    <strong><?= $this->title ?></strong>
-    <span class="label label-<?= Order::getStatusBadge($order->status) ?> pull-right"><?= Order::getStatusLabels()[$order->status] ?></span>
-</div>
 <div class="panel-body">
 <div class="row">
     <div class="col-sm-6">
+        <h5>Order <?= Html::encode($order->order_number) ?>
+            <span class="label label-<?= Order::getStatusBadge($order->status) ?>"><?= Order::getStatusLabels()[$order->status] ?></span>
+        </h5>
         <h5>Buyer</h5>
         <p><?= Html::encode($order->buyer_name) ?><br><small class="text-muted"><?= Html::encode($order->buyer_email) ?></small></p>
+        <?php if ($order->delivery_address): ?>
+            <h5>Delivery Address</h5>
+            <p style="font-size:12px"><?= nl2br(Html::encode($order->delivery_address)) ?></p>
+        <?php endif; ?>
         <h5>Payment</h5>
         <p><strong>Method:</strong> <?= Html::encode($order->payment_method) ?><br>
         <strong>Reference:</strong> <code><?= Html::encode($order->payment_reference) ?></code><br>
@@ -23,7 +24,7 @@ $this->title = Yii::t('ShopModule.base', 'Order') . ' ' . $order->order_number;
         <?php endif; ?>
     </div>
     <div class="col-sm-6">
-        <h5>Order Summary</h5>
+        <h5>Items</h5>
         <table class="table table-condensed">
         <thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
         <tbody>
@@ -43,4 +44,4 @@ $this->title = Yii::t('ShopModule.base', 'Order') . ' ' . $order->order_number;
 <?php if (in_array($order->status, [Order::STATUS_PENDING, Order::STATUS_PAID])): ?>
     <a href="<?= Url::to(['/shop/admin/cancel-order', 'id' => $order->id]) ?>" class="btn btn-danger pull-right" style="margin-right:5px" data-method="post" data-confirm="Cancel this order?"><i class="fa fa-times"></i> Cancel Order</a>
 <?php endif; ?>
-</div></div>
+</div>

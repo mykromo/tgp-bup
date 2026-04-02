@@ -33,4 +33,9 @@ class Module extends BaseModule
     {
         return Yii::t('ShopModule.base', 'System-wide shop with manual payment and reference number tracking');
     }
+
+    public function getConfigUrl()
+    {
+        return \yii\helpers\Url::to(['/shop/admin/index']);
+    }
 }

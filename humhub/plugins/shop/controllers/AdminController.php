@@ -2,11 +2,12 @@
 
 namespace humhub\modules\shop\controllers;
 
-use humhub\components\Controller;
+use humhub\modules\admin\components\Controller;
 use humhub\modules\shop\models\Order;
 use humhub\modules\shop\models\PaymentSetting;
 use humhub\modules\shop\models\Product;
 use humhub\modules\shop\models\ProductImage;
+use humhub\modules\shop\models\Vendor;
 use Yii;
 use yii\data\Pagination;
 use yii\web\ForbiddenHttpException;
@@ -15,10 +16,15 @@ use yii\web\UploadedFile;
 
 class AdminController extends Controller
 {
+    /**
+     * Use the admin layout so this appears inside the Administration section.
+     */
+    public $subLayout = '@shop/views/admin/layout';
+
     public function init()
     {
         parent::init();
-        $this->subLayout = '@shop/views/layouts/shop';
+        $this->appendPageTitle(Yii::t('ShopModule.base', 'Shop'));
     }
 
     private function requireAdmin()
@@ -28,94 +34,212 @@ class AdminController extends Controller
         }
     }
 
-    public function actionProducts()
+    // ── Dashboard ──
+
+    public function actionIndex()
     {
         $this->requireAdmin();
-        $products = Product::find()->where(['or', ['space_id' => null], ['space_id' => 0]])->orderBy(['sort_order' => SORT_ASC])->all();
-        return $this->render('products', ['products' => $products]);
+
+        $totalStores = Vendor::find()->count();
+        $pendingApps = Vendor::find()->where(['status' => Vendor::STATUS_PENDING])->count();
+        $activeStores = Vendor::find()->where(['status' => Vendor::STATUS_APPROVED])->count();
+        $suspendedStores = Vendor::find()->where(['status' => Vendor::STATUS_SUSPENDED])->count();
+        $totalProducts = Product::find()->count();
+        $totalOrders = Order::find()->count();
+        $pendingOrders = Order::find()->where(['status' => Order::STATUS_PAID])->count();
+
+        return $this->render('index', [
+            'totalStores' => $totalStores,
+            'pendingApps' => $pendingApps,
+            'activeStores' => $activeStores,
+            'suspendedStores' => $suspendedStores,
+            'totalProducts' => $totalProducts,
+            'totalOrders' => $totalOrders,
+            'pendingOrders' => $pendingOrders,
+        ]);
     }
 
-    public function actionCreateProduct()
+    // ── Applications ──
+
+    public function actionApplications()
     {
         $this->requireAdmin();
-        $model = new Product();
-        $model->space_id = null;
-        $model->currency = 'PHP';
-        $model->sort_order = 0;
+        $status = Yii::$app->request->get('status', 'pending');
+        $query = Vendor::find()->where(['status' => $status])->orderBy(['created_at' => SORT_DESC]);
+        $pagination = new Pagination(['totalCount' => $query->count(), 'pageSize' => 20]);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            $this->handleImageUploads($model);
-            Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Product saved.'));
-            $this->view->saved();
-            return $this->redirect(['/shop/admin/products']);
-        }
-        return $this->render('product-form', ['model' => $model]);
+        return $this->render('applications', [
+            'vendors' => $query->offset($pagination->offset)->limit($pagination->limit)->all(),
+            'pagination' => $pagination,
+            'selectedStatus' => $status,
+        ]);
     }
 
-    public function actionEditProduct($id)
+    public function actionReview($id)
     {
         $this->requireAdmin();
-        $model = Product::findOne($id);
-        if (!$model) throw new NotFoundHttpException();
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            $this->handleImageUploads($model);
-            Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Product updated.'));
-            $this->view->saved();
-            return $this->redirect(['/shop/admin/products']);
-        }
-        return $this->render('product-form', ['model' => $model]);
+        $vendor = Vendor::findOne($id);
+        if (!$vendor) throw new NotFoundHttpException();
+        return $this->render('review', ['vendor' => $vendor]);
     }
 
-    public function actionDeleteImage($id)
+    public function actionApprove($id)
     {
         $this->requireAdmin();
         $this->forcePostRequest();
-        $img = ProductImage::findOne($id);
-        if ($img) {
-            $fullPath = Yii::getAlias('@webroot') . '/' . $img->file_path;
-            if (file_exists($fullPath)) @unlink($fullPath);
-            $productId = $img->product_id;
-            $img->delete();
-            Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Image deleted.'));
-            return $this->redirect(['/shop/admin/edit-product', 'id' => $productId]);
+        $vendor = Vendor::findOne($id);
+        if (!$vendor) throw new NotFoundHttpException();
+
+        $vendor->status = Vendor::STATUS_APPROVED;
+        $vendor->reviewed_by = Yii::$app->user->id;
+        $vendor->reviewed_at = date('Y-m-d H:i:s');
+        $vendor->save(false);
+
+        try {
+            $notification = new \humhub\modules\shop\notifications\VendorApproved([
+                'source' => $vendor,
+                'originator' => Yii::$app->user->getIdentity(),
+            ]);
+            $notification->send($vendor->user);
+        } catch (\Throwable $e) {
+            Yii::error('Vendor approval notification failed: ' . $e->getMessage(), 'shop');
         }
-        return $this->redirect(['/shop/admin/products']);
+
+        try {
+            Yii::$app->mailer->compose()
+                ->setTo($vendor->user->email)
+                ->setSubject(Yii::t('ShopModule.base', 'Your shop application has been approved!'))
+                ->setHtmlBody(
+                    '<h3>' . Yii::t('ShopModule.base', 'Congratulations!') . '</h3>'
+                    . '<p>' . Yii::t('ShopModule.base', 'Your shop application "{shopName}" has been approved.', ['shopName' => $vendor->shop_name]) . '</p>'
+                )->send();
+        } catch (\Throwable $e) {
+            Yii::error('Vendor approval email failed: ' . $e->getMessage(), 'shop');
+        }
+
+        Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Application approved.'));
+        return $this->redirect(['/shop/admin/applications']);
     }
 
-    private function handleImageUploads(Product $product): void
+    public function actionReject($id)
     {
-        $files = UploadedFile::getInstancesByName('product_images');
-        $uploadPath = ProductImage::getUploadPath();
-        $maxOrder = (int) ProductImage::find()->where(['product_id' => $product->id])->max('sort_order');
+        $this->requireAdmin();
+        $this->forcePostRequest();
+        $vendor = Vendor::findOne($id);
+        if (!$vendor) throw new NotFoundHttpException();
 
-        foreach ($files as $file) {
-            if ($file->size > ProductImage::MAX_FILE_SIZE) continue;
-            if (!in_array(strtolower($file->extension), ProductImage::ALLOWED_EXTENSIONS)) continue;
+        $vendor->status = Vendor::STATUS_REJECTED;
+        $vendor->rejection_reason = Yii::$app->request->post('reason', '');
+        $vendor->reviewed_by = Yii::$app->user->id;
+        $vendor->reviewed_at = date('Y-m-d H:i:s');
+        $vendor->save(false);
 
-            $fileName = $product->id . '_' . time() . '_' . mt_rand(100, 999) . '.' . $file->extension;
-            $tempPath = $uploadPath . '/tmp_' . $fileName;
-            $finalPath = $uploadPath . '/' . $fileName;
-
-            if ($file->saveAs($tempPath)) {
-                if (ProductImage::resizeImage($tempPath, $finalPath)) {
-                    if ($tempPath !== $finalPath) @unlink($tempPath);
-
-                    $maxOrder++;
-                    $img = new ProductImage();
-                    $img->product_id = $product->id;
-                    $img->file_name = $file->name;
-                    $img->file_path = 'uploads/shop/products/' . $fileName;
-                    $img->file_size = filesize($finalPath);
-                    $img->sort_order = $maxOrder;
-                    $img->created_at = date('Y-m-d H:i:s');
-                    $img->save(false);
-                } else {
-                    @unlink($tempPath);
-                }
-            }
+        try {
+            $notification = new \humhub\modules\shop\notifications\VendorRejected([
+                'source' => $vendor,
+                'originator' => Yii::$app->user->getIdentity(),
+            ]);
+            $notification->send($vendor->user);
+        } catch (\Throwable $e) {
+            Yii::error('Vendor rejection notification failed: ' . $e->getMessage(), 'shop');
         }
+
+        try {
+            Yii::$app->mailer->compose()
+                ->setTo($vendor->user->email)
+                ->setSubject(Yii::t('ShopModule.base', 'Your shop application has been rejected'))
+                ->setHtmlBody(
+                    '<p>' . Yii::t('ShopModule.base', 'Your shop application "{shopName}" has been rejected.', ['shopName' => $vendor->shop_name]) . '</p>'
+                    . ($vendor->rejection_reason ? '<p>Reason: ' . \humhub\libs\Html::encode($vendor->rejection_reason) . '</p>' : '')
+                )->send();
+        } catch (\Throwable $e) {
+            Yii::error('Vendor rejection email failed: ' . $e->getMessage(), 'shop');
+        }
+
+        Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Application rejected.'));
+        return $this->redirect(['/shop/admin/applications']);
     }
+
+    // ── Stores ──
+
+    public function actionStores()
+    {
+        $this->requireAdmin();
+        $status = Yii::$app->request->get('status');
+        $query = Vendor::find()->orderBy(['created_at' => SORT_DESC]);
+        if ($status) $query->andWhere(['status' => $status]);
+        $pagination = new Pagination(['totalCount' => $query->count(), 'pageSize' => 20]);
+
+        return $this->render('stores', [
+            'vendors' => $query->offset($pagination->offset)->limit($pagination->limit)->all(),
+            'pagination' => $pagination,
+            'selectedStatus' => $status,
+        ]);
+    }
+
+    public function actionDisableStore($id)
+    {
+        $this->requireAdmin();
+        $this->forcePostRequest();
+        $vendor = Vendor::findOne($id);
+        if (!$vendor) throw new NotFoundHttpException();
+
+        $vendor->status = Vendor::STATUS_SUSPENDED;
+        $vendor->disabled_reason = Yii::$app->request->post('reason', '');
+        $vendor->disabled_at = date('Y-m-d H:i:s');
+        $vendor->disabled_by = Yii::$app->user->id;
+        $vendor->save(false);
+
+        \humhub\modules\shop\helpers\ShopNotify::sendEmail(
+            $vendor->user->email ?? '',
+            'Your shop has been disabled',
+            '<p>Your shop <strong>' . \humhub\libs\Html::encode($vendor->shop_name) . '</strong> has been disabled.</p>'
+            . ($vendor->disabled_reason ? '<p>Reason: ' . \humhub\libs\Html::encode($vendor->disabled_reason) . '</p>' : '')
+        );
+
+        Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Store disabled.'));
+        return $this->redirect(['/shop/admin/stores']);
+    }
+
+    public function actionEnableStore($id)
+    {
+        $this->requireAdmin();
+        $this->forcePostRequest();
+        $vendor = Vendor::findOne($id);
+        if (!$vendor) throw new NotFoundHttpException();
+
+        $vendor->status = Vendor::STATUS_APPROVED;
+        $vendor->disabled_reason = null;
+        $vendor->disabled_at = null;
+        $vendor->disabled_by = null;
+        $vendor->reenable_request = null;
+        $vendor->reenable_requested_at = null;
+        $vendor->save(false);
+
+        \humhub\modules\shop\helpers\ShopNotify::sendEmail(
+            $vendor->user->email ?? '',
+            'Your shop has been re-enabled',
+            '<p>Your shop <strong>' . \humhub\libs\Html::encode($vendor->shop_name) . '</strong> has been re-enabled.</p>'
+        );
+
+        Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Store enabled.'));
+        return $this->redirect(['/shop/admin/stores']);
+    }
+
+    // ── Products ──
+
+    public function actionProducts()
+    {
+        $this->requireAdmin();
+        $query = Product::find()->orderBy(['sort_order' => SORT_ASC]);
+        $pagination = new Pagination(['totalCount' => $query->count(), 'pageSize' => 30]);
+        return $this->render('products', [
+            'products' => $query->offset($pagination->offset)->limit($pagination->limit)->all(),
+            'pagination' => $pagination,
+        ]);
+    }
+
+    // ── Orders ──
 
     public function actionOrders()
     {
@@ -154,7 +278,6 @@ class AdminController extends Controller
         $order->save(false);
 
         Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Order verified.'));
-        $this->view->saved();
         return $this->redirect(['/shop/admin/view-order', 'id' => $id]);
     }
 
@@ -175,9 +298,10 @@ class AdminController extends Controller
         }
 
         Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Order cancelled.'));
-        $this->view->saved();
         return $this->redirect(['/shop/admin/orders']);
     }
+
+    // ── Settings ──
 
     public function actionSettings()
     {
@@ -185,84 +309,13 @@ class AdminController extends Controller
         $model = PaymentSetting::getGlobal();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            // Save cache TTL
             $cacheTtl = max(0, min(86400, (int) Yii::$app->request->post('cacheTtl', 300)));
             Yii::$app->getModule('shop')->settings->set('cacheTtl', $cacheTtl);
             \humhub\modules\shop\helpers\ShopCache::flushAll();
             Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Settings saved.'));
-            $this->view->saved();
             return $this->redirect(['/shop/admin/settings']);
         }
 
         return $this->render('settings', ['model' => $model]);
-    }
-
-    // ── Vendor/Store Management ──
-
-    public function actionStores()
-    {
-        $this->requireAdmin();
-        $status = Yii::$app->request->get('status');
-        $query = \humhub\modules\shop\models\Vendor::find()->orderBy(['created_at' => SORT_DESC]);
-        if ($status) $query->andWhere(['status' => $status]);
-        $pagination = new Pagination(['totalCount' => $query->count(), 'pageSize' => 20]);
-
-        return $this->render('stores', [
-            'vendors' => $query->offset($pagination->offset)->limit($pagination->limit)->all(),
-            'pagination' => $pagination,
-            'selectedStatus' => $status,
-        ]);
-    }
-
-    public function actionDisableStore($id)
-    {
-        $this->requireAdmin();
-        $this->forcePostRequest();
-        $vendor = \humhub\modules\shop\models\Vendor::findOne($id);
-        if (!$vendor) throw new NotFoundHttpException();
-
-        $vendor->status = \humhub\modules\shop\models\Vendor::STATUS_SUSPENDED;
-        $vendor->disabled_reason = Yii::$app->request->post('reason', '');
-        $vendor->disabled_at = date('Y-m-d H:i:s');
-        $vendor->disabled_by = Yii::$app->user->id;
-        $vendor->save(false);
-
-        // Notify vendor
-        \humhub\modules\shop\helpers\ShopNotify::sendEmail(
-            $vendor->user->email ?? '',
-            'Your shop has been disabled',
-            '<p>Your shop <strong>' . \humhub\libs\Html::encode($vendor->shop_name) . '</strong> has been disabled by an administrator.</p>'
-            . ($vendor->disabled_reason ? '<p>Reason: ' . \humhub\libs\Html::encode($vendor->disabled_reason) . '</p>' : '')
-        );
-
-        Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Store disabled.'));
-        $this->view->saved();
-        return $this->redirect(['/shop/admin/stores']);
-    }
-
-    public function actionEnableStore($id)
-    {
-        $this->requireAdmin();
-        $this->forcePostRequest();
-        $vendor = \humhub\modules\shop\models\Vendor::findOne($id);
-        if (!$vendor) throw new NotFoundHttpException();
-
-        $vendor->status = \humhub\modules\shop\models\Vendor::STATUS_APPROVED;
-        $vendor->disabled_reason = null;
-        $vendor->disabled_at = null;
-        $vendor->disabled_by = null;
-        $vendor->reenable_request = null;
-        $vendor->reenable_requested_at = null;
-        $vendor->save(false);
-
-        \humhub\modules\shop\helpers\ShopNotify::sendEmail(
-            $vendor->user->email ?? '',
-            'Your shop has been re-enabled',
-            '<p>Your shop <strong>' . \humhub\libs\Html::encode($vendor->shop_name) . '</strong> has been re-enabled. You can now continue selling.</p>'
-        );
-
-        Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Store enabled.'));
-        $this->view->saved();
-        return $this->redirect(['/shop/admin/stores']);
     }
 }

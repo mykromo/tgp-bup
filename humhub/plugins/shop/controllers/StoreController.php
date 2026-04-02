@@ -25,6 +25,11 @@ class StoreController extends Controller
 
     public function actionIndex()
     {
+        // Administrators should use the Administration panel, not the shop storefront
+        if (!Yii::$app->user->isGuest && Yii::$app->user->isAdmin()) {
+            return $this->redirect(['/shop/admin/index']);
+        }
+
         $keyword = Yii::$app->request->get('q');
         $categoryId = Yii::$app->request->get('category');
         $location = Yii::$app->request->get('location');
@@ -62,7 +67,6 @@ class StoreController extends Controller
             'products' => $query->offset($pagination->offset)->limit($pagination->limit)->all(),
             'pagination' => $pagination,
             'isVendor' => $isVendor,
-            'canManage' => !Yii::$app->user->isGuest && Yii::$app->user->isAdmin(),
             'categories' => Category::getDropdownList(),
             'keyword' => $keyword,
             'selectedCategory' => $categoryId,
@@ -320,6 +324,7 @@ class StoreController extends Controller
     public function actionMyOrders()
     {
         if (Yii::$app->user->isGuest) return $this->redirect(Yii::$app->user->loginUrl);
+        if (Yii::$app->user->isAdmin()) return $this->redirect(['/shop/admin/index']);
 
         $query = Order::find()->where(['user_id' => Yii::$app->user->id])->orderBy(['created_at' => SORT_DESC]);
         $pagination = new Pagination(['totalCount' => $query->count(), 'pageSize' => 15]);
@@ -333,6 +338,7 @@ class StoreController extends Controller
     public function actionToggleWishlist($productId)
     {
         if (Yii::$app->user->isGuest) return $this->redirect(Yii::$app->user->loginUrl);
+        if (Yii::$app->user->isAdmin()) return $this->asJson(['error' => 'Admin accounts cannot use shop features.']);
         Yii::$app->response->format = 'json';
         $added = Wishlist::toggle(Yii::$app->user->id, (int) $productId);
         return ['wishlisted' => $added];
@@ -341,6 +347,7 @@ class StoreController extends Controller
     public function actionToggleFavorite($vendorId)
     {
         if (Yii::$app->user->isGuest) return $this->redirect(Yii::$app->user->loginUrl);
+        if (Yii::$app->user->isAdmin()) return $this->asJson(['error' => 'Admin accounts cannot use shop features.']);
         Yii::$app->response->format = 'json';
         $added = FavoriteStore::toggle(Yii::$app->user->id, (int) $vendorId);
         return ['favorited' => $added];
@@ -349,6 +356,7 @@ class StoreController extends Controller
     public function actionWishlist()
     {
         if (Yii::$app->user->isGuest) return $this->redirect(Yii::$app->user->loginUrl);
+        if (Yii::$app->user->isAdmin()) return $this->redirect(['/shop/admin/index']);
         $items = Wishlist::find()->where(['user_id' => Yii::$app->user->id])->with('product')->orderBy(['created_at' => SORT_DESC])->all();
         return $this->render('wishlist', ['items' => $items]);
     }
@@ -356,6 +364,7 @@ class StoreController extends Controller
     public function actionFavorites()
     {
         if (Yii::$app->user->isGuest) return $this->redirect(Yii::$app->user->loginUrl);
+        if (Yii::$app->user->isAdmin()) return $this->redirect(['/shop/admin/index']);
         $items = FavoriteStore::find()->where(['user_id' => Yii::$app->user->id])->with('vendor')->orderBy(['created_at' => SORT_DESC])->all();
         return $this->render('favorites', ['items' => $items]);
     }
@@ -369,7 +378,8 @@ class StoreController extends Controller
         $categoryFilter = Yii::$app->request->get('category');
         $sort = Yii::$app->request->get('sort', 'default');
         $keyword = Yii::$app->request->get('q');
-        $isFavorited = !Yii::$app->user->isGuest ? FavoriteStore::isFavorited(Yii::$app->user->id, $vendor->id) : false;
+        $isFavorited = (!Yii::$app->user->isGuest && !Yii::$app->user->isAdmin())
+            ? FavoriteStore::isFavorited(Yii::$app->user->id, $vendor->id) : false;
 
         $productQuery = Product::find()->where(['vendor_id' => $vendor->id, 'is_active' => 1]);
 

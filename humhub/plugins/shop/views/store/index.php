@@ -25,9 +25,6 @@ $this->title = Yii::t('ShopModule.base', 'Shop');
                 <?php endif; ?>
             <?php endif; ?>
         <?php endif; ?>
-        <?php if ($canManage): ?>
-            <a href="<?= Url::to(['/shop/admin/products']) ?>" class="btn btn-primary btn-sm"><i class="fa fa-cog"></i> Manage</a>
-        <?php endif; ?>
     </div>
 </div>
 <div class="panel-body">

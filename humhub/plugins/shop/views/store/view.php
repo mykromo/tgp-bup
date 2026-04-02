@@ -13,7 +13,7 @@ $vendorSuspended = $product->vendor && $product->vendor->status === \humhub\modu
 <div class="panel-heading">
     <strong><?= $this->title ?></strong>
     <div class="pull-right">
-        <?php if ($uid): ?>
+        <?php if ($uid && !Yii::$app->user->isAdmin()): ?>
         <a href="#" class="shop-wishlist-btn <?= $wishlisted ? 'active' : '' ?>" data-url="<?= Url::to(['/shop/store/toggle-wishlist', 'productId' => $product->id]) ?>" style="font-size:20px">
             <i class="fa fa-heart<?= $wishlisted ? '' : '-o' ?>"></i>
         </a>
