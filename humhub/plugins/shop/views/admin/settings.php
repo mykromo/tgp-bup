@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 use humhub\libs\Html;
 $cacheTtl = Yii::$app->getModule('shop')->settings->get('cacheTtl', 300);
 ?>
