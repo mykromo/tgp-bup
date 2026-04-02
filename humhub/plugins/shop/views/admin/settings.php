@@ -1,8 +1,12 @@
 <?php
 use humhub\libs\Html;
+use yii\helpers\Url;
 $cacheTtl = Yii::$app->getModule('shop')->settings->get('cacheTtl', 300);
 ?>
 <div class="panel-body">
+<div style="margin-bottom:15px">
+    <a href="<?= Url::to(['/shop/admin/index']) ?>" class="btn btn-default btn-sm"><i class="fa fa-arrow-left"></i> Back</a>
+</div>
 <?= Html::beginForm('', 'post') ?>
 <h5><i class="fa fa-bolt"></i> Cache Configuration</h5>
 <div class="form-group">

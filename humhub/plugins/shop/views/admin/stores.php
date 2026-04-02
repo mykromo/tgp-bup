@@ -6,7 +6,8 @@ humhub\assets\CardsAsset::register($this);
 ?>
 <div class="panel-body">
     <form method="get" action="<?= Url::to(['/shop/admin/stores']) ?>" class="form-inline" style="margin-bottom:15px">
-        <select name="status" class="form-control input-sm" onchange="this.form.submit()">
+        <a href="<?= Url::to(['/shop/admin/index']) ?>" class="btn btn-default btn-sm"><i class="fa fa-arrow-left"></i> Back</a>
+        <select name="status" class="form-control input-sm" style="margin-left:10px" onchange="this.form.submit()">
             <option value="">All Statuses</option>
             <?php foreach (Vendor::getStatusLabels() as $k => $v): ?>
                 <option value="<?= $k ?>" <?= ($selectedStatus ?? '') === $k ? 'selected' : '' ?>><?= $v ?></option>
@@ -16,17 +17,13 @@ humhub\assets\CardsAsset::register($this);
     </form>
 
     <?php if (empty($vendors)): ?>
-        <p class="text-muted text-center">
-            <strong>No stores found.</strong><br>
-            Try a different status filter.
-        </p>
+        <p class="text-muted text-center">No stores found.</p>
     <?php else: ?>
     <div class="row cards">
         <?php foreach ($vendors as $v):
             $logoUrl = $v->logo_path ? Yii::getAlias('@web') . '/' . $v->logo_path : '';
             $coverUrl = $v->cover_path ? Yii::getAlias('@web') . '/' . $v->cover_path : '';
             $storeUrl = Url::to(['/shop/store/vendor-store', 'id' => $v->id]);
-            $productCount = $v->getActiveProductCount();
             $followerCount = $v->getFollowerCount();
         ?>
         <div class="card card-space col-lg-4 col-md-6 col-sm-6 col-xs-12">
@@ -43,7 +40,7 @@ humhub\assets\CardsAsset::register($this);
                         <?php endif; ?>
                     </a>
                     <div class="card-icons">
-                        <span class="label label-<?= Vendor::getStatusBadge($v->status) ?>"><?= Vendor::getStatusLabels()[$v->status] ?? $v->status ?></span>
+                        <i class="fa fa-users" style="color:#59d6e4"></i> <span style="color:#59d6e4;font-weight:600"><?= $followerCount ?></span>
                     </div>
                 </div>
                 <div class="card-body">
@@ -51,25 +48,18 @@ humhub\assets\CardsAsset::register($this);
                     <?php if ($v->tagline): ?>
                         <div class="card-details"><?= Html::encode($v->tagline) ?></div>
                     <?php elseif ($v->description): ?>
-                        <div class="card-details"><?= Html::encode(mb_substr($v->description, 0, 80)) ?><?= mb_strlen($v->description) > 80 ? '...' : '' ?></div>
+                        <div class="card-details"><?= Html::encode(mb_substr($v->description, 0, 100)) ?><?= mb_strlen($v->description) > 100 ? '...' : '' ?></div>
                     <?php endif; ?>
-                    <div class="card-tags">
-                        <span class="label label-default"><i class="fa fa-cube"></i> <?= $productCount ?> Products</span>
-                        <span class="label label-default"><i class="fa fa-users"></i> <?= $followerCount ?> Followers</span>
-                        <?php if ($v->location): ?>
-                            <span class="label label-default"><i class="fa fa-map-marker"></i> <?= Html::encode($v->location) ?></span>
-                        <?php endif; ?>
-                    </div>
                 </div>
                 <div class="card-footer">
-                    <a href="<?= $storeUrl ?>" class="btn btn-default btn-sm"><i class="fa fa-eye"></i> View</a>
+                    <span class="label label-<?= Vendor::getStatusBadge($v->status) ?>"><i class="fa fa-user"></i> <?= Vendor::getStatusLabels()[$v->status] ?? $v->status ?></span>
                     <?php if ($v->status === Vendor::STATUS_APPROVED): ?>
-                        <?= Html::beginForm(Url::to(['/shop/admin/disable-store', 'id' => $v->id]), 'post', ['style' => 'display:inline']) ?>
+                        <?= Html::beginForm(Url::to(['/shop/admin/disable-store', 'id' => $v->id]), 'post', ['style' => 'display:inline;float:right']) ?>
                             <input type="hidden" name="reason" value="">
-                            <?= Html::submitButton('<i class="fa fa-ban"></i> Disable', ['class' => 'btn btn-danger btn-sm', 'data-confirm' => 'Disable this store?']) ?>
+                            <?= Html::submitButton('<i class="fa fa-ban"></i>', ['class' => 'btn btn-danger btn-xs', 'data-confirm' => 'Disable this store?', 'title' => 'Disable']) ?>
                         <?= Html::endForm() ?>
                     <?php elseif ($v->status === Vendor::STATUS_SUSPENDED): ?>
-                        <a href="<?= Url::to(['/shop/admin/enable-store', 'id' => $v->id]) ?>" class="btn btn-success btn-sm" data-method="post" data-confirm="Re-enable?"><i class="fa fa-check"></i> Enable</a>
+                        <a href="<?= Url::to(['/shop/admin/enable-store', 'id' => $v->id]) ?>" class="btn btn-success btn-xs pull-right" data-method="post" data-confirm="Re-enable?" title="Enable"><i class="fa fa-check"></i></a>
                     <?php endif; ?>
                 </div>
             </div>

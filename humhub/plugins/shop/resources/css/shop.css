@@ -197,11 +197,8 @@
 .store-profile-image-placeholder { width: 130px; height: 130px; border-radius: 3px; border: 3px solid #fff; background: #e8e8e8; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
 .store-profile-image-placeholder i { font-size: 40px; color: #bbb; }
 
-/* Image upload buttons — matches HumHub .image-upload-buttons positioning */
-.profile-banner-image-container #store-cover-buttons { position: absolute; top: 10px; right: 10px; z-index: 5; display: flex; gap: 4px; opacity: 0; transition: opacity .2s; }
-.profile-banner-image-container:hover #store-cover-buttons { opacity: 1; }
-.profile-user-photo-container #store-logo-buttons { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); z-index: 5; display: flex; gap: 4px; opacity: 0; transition: opacity .2s; }
-.profile-user-photo-container:hover #store-logo-buttons { opacity: 1; }
+/* Image upload buttons — rely on HumHub native .image-upload-buttons positioning */
+/* The native CSS positions these at bottom of the container, visible on hover */
 
 /* Left navigation for store (matches Space left-navigation) */
 #store-main-menu .list-group-item { border-radius: 0; border-left: none; border-right: none; padding: 10px 15px; color: #555; font-size: 13px; }

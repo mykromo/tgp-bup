@@ -3,6 +3,9 @@ use humhub\libs\Html;
 use yii\helpers\Url;
 ?>
 <div class="panel-body">
+<div style="margin-bottom:15px">
+    <a href="<?= Url::to(['/shop/admin/index']) ?>" class="btn btn-default btn-sm"><i class="fa fa-arrow-left"></i> Back</a>
+</div>
 <?php if (empty($products)): ?>
     <p class="text-muted text-center">No products yet.</p>
 <?php else: ?>

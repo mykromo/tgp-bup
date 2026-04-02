@@ -4,6 +4,9 @@ use humhub\modules\shop\models\Vendor;
 use yii\helpers\Url;
 ?>
 <div class="panel-body">
+<div style="margin-bottom:15px">
+    <a href="<?= Url::to(['/shop/admin/index']) ?>" class="btn btn-default btn-sm"><i class="fa fa-arrow-left"></i> Back</a>
+</div>
 <form method="get" action="<?= Url::to(['/shop/admin/applications']) ?>" class="form-inline" style="margin-bottom:15px">
     <select name="status" class="form-control input-sm" onchange="this.form.submit()">
         <?php foreach (Vendor::getStatusLabels() as $k => $v): ?>

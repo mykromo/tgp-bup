@@ -15,7 +15,7 @@ $followerCount = $vendor->getFollowerCount();
 <div class="panel panel-default panel-profile">
 
     <div class="panel-profile-header">
-        <!-- Banner / Cover -->
+        <!-- Cover / Banner -->
         <div class="image-upload-container profile-banner-image-container">
             <?php if ($coverUrl): ?>
                 <img src="<?= Html::encode($coverUrl) ?>" class="img-profile-header-background" style="width:100%" alt="">
@@ -23,6 +23,7 @@ $followerCount = $vendor->getFollowerCount();
                 <div class="store-banner-placeholder"></div>
             <?php endif; ?>
 
+            <!-- Name + tagline overlay on cover, right of logo -->
             <div class="img-profile-data">
                 <h1 class="space"><?= Html::encode($vendor->shop_name) ?></h1>
                 <?php if ($vendor->tagline): ?>
@@ -31,17 +32,16 @@ $followerCount = $vendor->getFollowerCount();
             </div>
 
             <?php if ($isOwner): ?>
-            <div class="image-upload-buttons" id="store-cover-buttons">
-                <?= Html::beginForm(Url::to(['/shop/seller/upload-cover']), 'post', ['enctype' => 'multipart/form-data', 'style' => 'display:inline', 'id' => 'store-cover-form']) ?>
-                    <label class="btn btn-info btn-sm" style="margin:0;cursor:pointer" title="Upload cover photo">
+            <div class="image-upload-buttons">
+                <?= Html::beginForm(Url::to(['/shop/seller/upload-cover']), 'post', ['enctype' => 'multipart/form-data', 'style' => 'display:inline']) ?>
+                    <label class="btn btn-info btn-sm profile-image-upload" style="margin:0;cursor:pointer" title="Upload cover">
                         <i class="fa fa-upload"></i>
-                        <input type="file" name="cover" accept=".jpg,.jpeg,.png,.webp" style="display:none"
-                               onchange="this.form.submit()">
+                        <input type="file" name="cover" accept=".jpg,.jpeg,.png,.webp" style="display:none" onchange="this.form.submit()">
                     </label>
                 <?= Html::endForm() ?>
                 <?php if ($coverUrl): ?>
                     <a href="<?= Url::to(['/shop/seller/delete-cover']) ?>" class="btn btn-danger btn-sm" data-method="post"
-                       data-confirm="Delete cover photo?" title="Delete cover"><i class="fa fa-remove"></i></a>
+                       data-confirm="Delete cover photo?"><i class="fa fa-remove"></i></a>
                 <?php endif; ?>
             </div>
             <?php endif; ?>
@@ -59,28 +59,28 @@ $followerCount = $vendor->getFollowerCount();
             <?php endif; ?>
 
             <?php if ($isOwner): ?>
-            <div class="image-upload-buttons" id="store-logo-buttons">
-                <?= Html::beginForm(Url::to(['/shop/seller/upload-logo']), 'post', ['enctype' => 'multipart/form-data', 'style' => 'display:inline', 'id' => 'store-logo-form']) ?>
-                    <label class="btn btn-info btn-sm" style="margin:0;cursor:pointer" title="Upload logo">
+            <div class="image-upload-buttons">
+                <?= Html::beginForm(Url::to(['/shop/seller/upload-logo']), 'post', ['enctype' => 'multipart/form-data', 'style' => 'display:inline']) ?>
+                    <label class="btn btn-info btn-sm profile-image-upload" style="margin:0;cursor:pointer" title="Upload logo">
                         <i class="fa fa-upload"></i>
-                        <input type="file" name="logo" accept=".jpg,.jpeg,.png,.webp" style="display:none"
-                               onchange="this.form.submit()">
+                        <input type="file" name="logo" accept=".jpg,.jpeg,.png,.webp" style="display:none" onchange="this.form.submit()">
                     </label>
                 <?= Html::endForm() ?>
                 <?php if ($logoUrl): ?>
                     <a href="<?= Url::to(['/shop/seller/delete-logo']) ?>" class="btn btn-danger btn-sm" data-method="post"
-                       data-confirm="Delete logo?" title="Delete logo"><i class="fa fa-remove"></i></a>
+                       data-confirm="Delete logo?"><i class="fa fa-remove"></i></a>
                 <?php endif; ?>
             </div>
             <?php endif; ?>
         </div>
     </div>
 
-    <!-- Controls bar -->
+    <!-- Controls bar — matches Space profileHeaderControls exactly -->
     <div class="panel-body">
         <div class="panel-profile-controls">
             <div class="row">
                 <div class="col-md-12">
+                    <!-- Counters — uses HumHub native .statistics layout -->
                     <div class="statistics pull-left">
                         <div class="pull-left entry">
                             <span class="count"><?= $productCount ?></span><br>
@@ -92,6 +92,7 @@ $followerCount = $vendor->getFollowerCount();
                         </div>
                     </div>
 
+                    <!-- Action buttons — matches Space controls-header -->
                     <div class="controls controls-header pull-right">
                         <?php if (!Yii::$app->user->isGuest && !$isOwner && !$isAdmin): ?>
                             <a href="<?= Url::to(['/shop/store/toggle-follow', 'vendorId' => $vendor->id]) ?>"
@@ -101,7 +102,7 @@ $followerCount = $vendor->getFollowerCount();
                         <?php endif; ?>
                         <?php if ($isOwner): ?>
                             <a href="<?= Url::to(['/shop/seller/edit-store']) ?>" class="btn btn-default btn-sm"><i class="fa fa-pencil"></i> Edit Store</a>
-                            <a href="<?= Url::to(['/shop/seller/dashboard']) ?>" class="btn btn-default btn-sm"><i class="fa fa-cog"></i> Manage</a>
+                            <a href="<?= Url::to(['/shop/seller/dashboard']) ?>" class="btn btn-default btn-sm"><i class="fa fa-cog"></i></a>
                         <?php endif; ?>
                     </div>
                 </div>
