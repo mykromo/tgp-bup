@@ -21,6 +21,8 @@
 /* ── Search Bar ── */
 .shop-search { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 20px; padding: 12px; background: #f9f9f9; border-radius: 6px; }
 .shop-search input, .shop-search select { border-radius: 4px; }
+.panel-body > .form-inline { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.panel-body > .form-inline .form-control { display: inline-block; width: auto; }
 
 /* ── Wishlist Heart ── */
 .shop-wishlist-btn { color: #ccc; cursor: pointer; font-size: 18px; transition: color .15s; }

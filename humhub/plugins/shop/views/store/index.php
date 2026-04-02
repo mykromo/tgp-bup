@@ -11,8 +11,10 @@ $uid = Yii::$app->user->isGuest ? 0 : Yii::$app->user->id;
     <strong><i class="fa fa-shopping-cart"></i> <?= Yii::t('ShopModule.base', 'Shop') ?></strong>
     <div class="pull-right">
         <?php if (!Yii::$app->user->isGuest): ?>
-        <a href="<?= Url::to(['/shop/store/my-orders']) ?>" class="btn btn-default btn-sm"><i class="fa fa-list"></i> My Orders</a>
-        <a href="<?= Url::to(['/shop/address/index']) ?>" class="btn btn-default btn-sm"><i class="fa fa-map-marker"></i> Addresses</a>
+            <a href="<?= Url::to(['/shop/store/my-orders']) ?>" class="btn btn-default btn-sm"><i class="fa fa-list"></i> My Orders</a>
+            <a href="<?= Url::to(['/shop/address/index']) ?>" class="btn btn-default btn-sm"><i class="fa fa-map-marker"></i> Addresses</a>
+            <a href="<?= Url::to(['/shop/store/wishlist']) ?>" class="btn btn-default btn-sm"><i class="fa fa-heart"></i> Wishlist</a>
+            <a href="<?= Url::to(['/shop/store/favorites']) ?>" class="btn btn-default btn-sm"><i class="fa fa-star"></i> Favorites</a>
             <?php if ($isVendor && $isVendor->isApproved()): ?>
                 <a href="<?= Url::to(['/shop/seller/dashboard']) ?>" class="btn btn-default btn-sm"><i class="fa fa-cube"></i> My Shop</a>
             <?php elseif (!$isVendor): ?>
@@ -22,31 +24,23 @@ $uid = Yii::$app->user->isGuest ? 0 : Yii::$app->user->id;
             <?php endif; ?>
         <?php endif; ?>
         <?php if ($canManage): ?>
-        <a href="<?= Url::to(['/shop/vendor/applications']) ?>" class="btn btn-default btn-sm"><i class="fa fa-users"></i> Applications</a>
-        <a href="<?= Url::to(['/shop/admin/products']) ?>" class="btn btn-primary btn-sm"><i class="fa fa-cog"></i> Manage</a>
+            <a href="<?= Url::to(['/shop/admin/products']) ?>" class="btn btn-primary btn-sm"><i class="fa fa-cog"></i> Manage</a>
         <?php endif; ?>
     </div>
 </div>
 <div class="panel-body">
 
-<!-- Search & Filter -->
-<div class="shop-search">
-    <form method="get" action="<?= Url::to(['/shop/store/index']) ?>" style="display:contents">
-        <input type="text" name="q" value="<?= Html::encode($keyword ?? '') ?>" class="form-control input-sm" placeholder="Search products..." style="width:200px">
-        <select name="category" class="form-control input-sm">
-            <option value="">All Categories</option>
-            <?php foreach ($categories as $cid => $cname): ?>
-                <option value="<?= $cid ?>" <?= ($selectedCategory ?? '') == $cid ? 'selected' : '' ?>><?= Html::encode($cname) ?></option>
-            <?php endforeach; ?>
-        </select>
-        <input type="text" name="location" value="<?= Html::encode($selectedLocation ?? '') ?>" class="form-control input-sm" placeholder="Location..." style="width:140px">
-        <button type="submit" class="btn btn-default btn-sm"><i class="fa fa-search"></i> Search</button>
-    </form>
-    <?php if (!Yii::$app->user->isGuest): ?>
-    <a href="<?= Url::to(['/shop/store/wishlist']) ?>" class="btn btn-default btn-sm"><i class="fa fa-heart"></i> Wishlist</a>
-    <a href="<?= Url::to(['/shop/store/favorites']) ?>" class="btn btn-default btn-sm"><i class="fa fa-star"></i> Favorites</a>
-    <?php endif; ?>
-</div>
+<form method="get" action="<?= Url::to(['/shop/store/index']) ?>" class="form-inline" style="margin-bottom:16px">
+    <input type="text" name="q" value="<?= Html::encode($keyword ?? '') ?>" class="form-control input-sm" placeholder="Search products..." style="width:180px">
+    <select name="category" class="form-control input-sm">
+        <option value="">All Categories</option>
+        <?php foreach ($categories as $cid => $cname): ?>
+            <option value="<?= $cid ?>" <?= ($selectedCategory ?? '') == $cid ? 'selected' : '' ?>><?= Html::encode($cname) ?></option>
+        <?php endforeach; ?>
+    </select>
+    <input type="text" name="location" value="<?= Html::encode($selectedLocation ?? '') ?>" class="form-control input-sm" placeholder="Location..." style="width:130px">
+    <button type="submit" class="btn btn-default btn-sm"><i class="fa fa-search"></i></button>
+</form>
 
 <?php if (empty($products)): ?>
     <div class="text-center text-muted" style="padding:40px">
