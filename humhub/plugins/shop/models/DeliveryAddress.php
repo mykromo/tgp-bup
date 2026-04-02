@@ -44,7 +44,11 @@ class DeliveryAddress extends ActiveRecord
         if ($insert) $this->created_at = date('Y-m-d H:i:s');
         $this->updated_at = date('Y-m-d H:i:s');
         if ($this->is_default) {
-            static::updateAll(['is_default' => 0], ['and', ['user_id' => $this->user_id], ['!=', 'id', $this->id ?: 0]]);
+            $condition = ['user_id' => $this->user_id];
+            if (!$this->isNewRecord) {
+                $condition = ['and', $condition, ['!=', 'id', $this->id]];
+            }
+            static::updateAll(['is_default' => 0], $condition);
         }
         return parent::beforeSave($insert);
     }

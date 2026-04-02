@@ -25,7 +25,8 @@ class ProductVariant extends ActiveRecord
 
     public function getEffectivePrice(): float
     {
-        return (float) $this->product->price + (float) $this->price_adjustment;
+        $base = $this->product ? (float) $this->product->price : 0;
+        return $base + (float) $this->price_adjustment;
     }
 
     public function formatPrice(): string

@@ -19,7 +19,7 @@ $this->title = Yii::t('ShopModule.base', 'Order') . ' ' . $order->order_number;
         <strong>Reference:</strong> <code><?= Html::encode($order->payment_reference) ?></code><br>
         <strong>Date:</strong> <?= $order->payment_date ? Yii::$app->formatter->asDatetime($order->payment_date) : '—' ?></p>
         <?php if ($order->payment_verified): ?>
-        <p class="text-success"><i class="fa fa-check-circle"></i> Verified by <?= Html::encode($order->verifier->displayName ?? 'Admin') ?> on <?= Yii::$app->formatter->asDatetime($order->verified_at) ?></p>
+        <p class="text-success"><i class="fa fa-check-circle"></i> Verified by <?= Html::encode($order->verifier ? $order->verifier->displayName : 'Admin') ?> on <?= Yii::$app->formatter->asDatetime($order->verified_at) ?></p>
         <?php endif; ?>
     </div>
     <div class="col-sm-6">

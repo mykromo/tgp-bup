@@ -17,11 +17,11 @@ class ShopNotify
         $user = $order->user;
         if (!$user) return;
 
-        // System notification
         try {
+            $originator = (!Yii::$app->user->isGuest) ? Yii::$app->user->getIdentity() : $user;
             $notification = new \humhub\modules\shop\notifications\OrderUpdate([
                 'source' => $order,
-                'originator' => Yii::$app->user->isGuest ? null : Yii::$app->user->getIdentity(),
+                'originator' => $originator,
             ]);
             $notification->customMessage = $subject;
             $notification->send($user);
@@ -88,7 +88,9 @@ class ShopNotify
     {
         $itemName = ($order->items[0] ?? null) ? $order->items[0]->product_name : 'Order';
         $subject = $order->order_number . ' - ' . $itemName;
+        $user = User::findOne($recipientId);
+        $guid = $user ? $user->guid : '';
 
-        return \yii\helpers\Url::to(['/mail/mail/create', 'userGuid' => User::findOne($recipientId)->guid ?? '', 'title' => $subject]);
+        return \yii\helpers\Url::to(['/mail/mail/create', 'userGuid' => $guid, 'title' => $subject]);
     }
 }
