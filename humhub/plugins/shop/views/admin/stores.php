@@ -19,52 +19,58 @@ humhub\assets\CardsAsset::register($this);
     <?php if (empty($vendors)): ?>
         <p class="text-muted text-center">No stores found.</p>
     <?php else: ?>
-    <div class="row cards">
+    <div class="row">
         <?php foreach ($vendors as $v):
             $logoUrl = $v->logo_path ? Yii::getAlias('@web') . '/' . $v->logo_path : '';
             $coverUrl = $v->cover_path ? Yii::getAlias('@web') . '/' . $v->cover_path : '';
             $storeUrl = Url::to(['/shop/store/vendor-store', 'id' => $v->id]);
             $followerCount = $v->getFollowerCount();
-            $coverStyle = $coverUrl
-                ? 'background-image:url(\'' . Html::encode($coverUrl) . '\');background-size:cover;background-position:center'
-                : 'background:#d5d5d5';
+            $coverBg = $coverUrl ? 'url(' . Html::encode($coverUrl) . ') center/cover no-repeat' : '#d5d5d5';
         ?>
-        <div class="card card-space col-lg-3 col-md-4 col-sm-6 col-xs-12">
-            <div class="card-panel<?= $v->status === Vendor::STATUS_SUSPENDED ? ' card-archived' : '' ?>">
-                <div class="card-bg-image" style="<?= $coverStyle ?>"></div>
-                <div class="card-header">
-                    <a href="<?= $storeUrl ?>" class="card-image-link">
+        <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" style="margin-bottom:20px">
+            <div style="background:#fff;border:1px solid #ddd;border-radius:4px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.1);transition:box-shadow .2s">
+                <!-- Cover -->
+                <div style="height:100px;background:<?= $coverBg ?>;position:relative">
+                    <div style="position:absolute;top:8px;right:10px">
+                        <i class="fa fa-users" style="color:#59d6e4"></i>
+                        <span style="color:#59d6e4;font-weight:600"><?= $followerCount ?></span>
+                    </div>
+                </div>
+                <!-- Logo -->
+                <div style="padding:0 15px;margin-top:-40px;position:relative;z-index:1">
+                    <a href="<?= $storeUrl ?>">
                         <?php if ($logoUrl): ?>
-                            <img src="<?= Html::encode($logoUrl) ?>" class="space-profile-image" style="width:94px;height:94px;border-radius:4px;object-fit:cover;border:3px solid #fff" alt="">
+                            <img src="<?= Html::encode($logoUrl) ?>" style="width:80px;height:80px;border-radius:4px;object-fit:cover;border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.15)" alt="">
                         <?php else: ?>
-                            <div style="width:94px;height:94px;border-radius:4px;background:<?= $v->getPlaceholderColor() ?>;border:3px solid #fff;display:flex;align-items:center;justify-content:center">
-                                <span style="font-size:32px;font-weight:700;color:#fff;letter-spacing:1px"><?= Html::encode($v->getInitials()) ?></span>
+                            <div style="width:80px;height:80px;border-radius:4px;background:<?= $v->getPlaceholderColor() ?>;border:3px solid #fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.15)">
+                                <span style="font-size:26px;font-weight:700;color:#fff"><?= Html::encode($v->getInitials()) ?></span>
                             </div>
                         <?php endif; ?>
                     </a>
-                    <div class="card-icons">
-                        <i class="fa fa-users" style="color:#59d6e4"></i> <span style="color:#59d6e4;font-weight:600"><?= $followerCount ?></span>
-                    </div>
                 </div>
-                <div class="card-body">
-                    <strong class="card-title"><a href="<?= $storeUrl ?>"><?= Html::encode($v->shop_name) ?></a></strong>
+                <!-- Body -->
+                <div style="padding:10px 15px 12px">
+                    <strong style="font-size:14px"><a href="<?= $storeUrl ?>" style="color:#333;text-decoration:none"><?= Html::encode($v->shop_name) ?></a></strong>
                     <?php if ($v->tagline): ?>
-                        <div class="card-details"><?= Html::encode($v->tagline) ?></div>
+                        <div style="color:#888;font-size:13px;margin-top:2px"><?= Html::encode($v->tagline) ?></div>
                     <?php endif; ?>
                     <?php if ($v->user): ?>
-                        <div class="card-details" style="margin-top:4px"><small class="text-muted"><i class="fa fa-user"></i> <?= Html::encode($v->user->displayName) ?></small></div>
+                        <div style="color:#aaa;font-size:12px;margin-top:4px"><i class="fa fa-user"></i> <?= Html::encode($v->user->displayName) ?></div>
                     <?php endif; ?>
                 </div>
-                <div class="card-footer">
+                <!-- Footer -->
+                <div style="padding:8px 15px;border-top:1px solid #eee;display:flex;align-items:center;justify-content:space-between">
                     <span class="label label-<?= Vendor::getStatusBadge($v->status) ?>"><i class="fa fa-user"></i> <?= Vendor::getStatusLabels()[$v->status] ?? $v->status ?></span>
-                    <?php if ($v->status === Vendor::STATUS_APPROVED): ?>
-                        <?= Html::beginForm(Url::to(['/shop/admin/disable-store', 'id' => $v->id]), 'post', ['style' => 'display:inline;float:right']) ?>
-                            <input type="hidden" name="reason" value="">
-                            <?= Html::submitButton('<i class="fa fa-ban"></i>', ['class' => 'btn btn-danger btn-xs', 'data-confirm' => 'Disable this store?', 'title' => 'Disable']) ?>
-                        <?= Html::endForm() ?>
-                    <?php elseif ($v->status === Vendor::STATUS_SUSPENDED): ?>
-                        <a href="<?= Url::to(['/shop/admin/enable-store', 'id' => $v->id]) ?>" class="btn btn-success btn-xs pull-right" data-method="post" data-confirm="Re-enable?" title="Enable"><i class="fa fa-check"></i></a>
-                    <?php endif; ?>
+                    <div>
+                        <?php if ($v->status === Vendor::STATUS_APPROVED): ?>
+                            <?= Html::beginForm(Url::to(['/shop/admin/disable-store', 'id' => $v->id]), 'post', ['style' => 'display:inline']) ?>
+                                <input type="hidden" name="reason" value="">
+                                <?= Html::submitButton('<i class="fa fa-ban"></i>', ['class' => 'btn btn-danger btn-xs', 'data-confirm' => 'Disable this store?', 'title' => 'Disable']) ?>
+                            <?= Html::endForm() ?>
+                        <?php elseif ($v->status === Vendor::STATUS_SUSPENDED): ?>
+                            <a href="<?= Url::to(['/shop/admin/enable-store', 'id' => $v->id]) ?>" class="btn btn-success btn-xs" data-method="post" data-confirm="Re-enable?" title="Enable"><i class="fa fa-check"></i></a>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
         </div>
