@@ -15,7 +15,11 @@ use yii\web\UploadedFile;
 
 class AdminController extends Controller
 {
-    public $subLayout = '@shop/views/layouts/main';
+    public function init()
+    {
+        parent::init();
+        $this->subLayout = Yii::$app->getModule('shop')->getBasePath() . '/views/layouts/main';
+    }
 
     private function requireAdmin()
     {
@@ -185,5 +189,70 @@ class AdminController extends Controller
         }
 
         return $this->render('settings', ['model' => $model]);
+    }
+
+    // ── Vendor/Store Management ──
+
+    public function actionStores()
+    {
+        $this->requireAdmin();
+        $status = Yii::$app->request->get('status');
+        $query = \humhub\modules\shop\models\Vendor::find()->orderBy(['created_at' => SORT_DESC]);
+        if ($status) $query->andWhere(['status' => $status]);
+        $pagination = new Pagination(['totalCount' => $query->count(), 'pageSize' => 20]);
+
+        return $this->render('stores', [
+            'vendors' => $query->offset($pagination->offset)->limit($pagination->limit)->all(),
+            'pagination' => $pagination,
+            'selectedStatus' => $status,
+        ]);
+    }
+
+    public function actionDisableStore($id)
+    {
+        $this->requireAdmin();
+        $this->forcePostRequest();
+        $vendor = \humhub\modules\shop\models\Vendor::findOne($id);
+        if (!$vendor) throw new NotFoundHttpException();
+
+        $vendor->status = \humhub\modules\shop\models\Vendor::STATUS_SUSPENDED;
+        $vendor->disabled_reason = Yii::$app->request->post('reason', '');
+        $vendor->disabled_at = date('Y-m-d H:i:s');
+        $vendor->disabled_by = Yii::$app->user->id;
+        $vendor->save(false);
+
+        // Notify vendor
+        \humhub\modules\shop\helpers\ShopNotify::sendEmail(
+            $vendor->user->email ?? '',
+            'Your shop has been disabled',
+            '<p>Your shop <strong>' . \humhub\libs\Html::encode($vendor->shop_name) . '</strong> has been disabled by an administrator.</p>'
+            . ($vendor->disabled_reason ? '<p>Reason: ' . \humhub\libs\Html::encode($vendor->disabled_reason) . '</p>' : '')
+        );
+
+        $this->view->saved();
+        return $this->redirect(['/shop/admin/stores']);
+    }
+
+    public function actionEnableStore($id)
+    {
+        $this->requireAdmin();
+        $this->forcePostRequest();
+        $vendor = \humhub\modules\shop\models\Vendor::findOne($id);
+        if (!$vendor) throw new NotFoundHttpException();
+
+        $vendor->status = \humhub\modules\shop\models\Vendor::STATUS_APPROVED;
+        $vendor->disabled_reason = null;
+        $vendor->disabled_at = null;
+        $vendor->disabled_by = null;
+        $vendor->save(false);
+
+        \humhub\modules\shop\helpers\ShopNotify::sendEmail(
+            $vendor->user->email ?? '',
+            'Your shop has been re-enabled',
+            '<p>Your shop <strong>' . \humhub\libs\Html::encode($vendor->shop_name) . '</strong> has been re-enabled. You can now continue selling.</p>'
+        );
+
+        $this->view->saved();
+        return $this->redirect(['/shop/admin/stores']);
     }
 }

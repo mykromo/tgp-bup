@@ -78,12 +78,13 @@ class Vendor extends ActiveRecord
 
     public static function getStatusBadge(string $status): string
     {
-        return match ($status) {
+        $map = [
             self::STATUS_APPROVED => 'success',
             self::STATUS_REJECTED => 'danger',
             self::STATUS_SUSPENDED => 'warning',
-            default => 'info',
-        };
+            self::STATUS_PENDING => 'info',
+        ];
+        return $map[$status] ?? 'default';
     }
 
     public static function getRequiredDocuments(): array

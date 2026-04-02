@@ -17,7 +17,11 @@ use yii\web\NotFoundHttpException;
 
 class StoreController extends Controller
 {
-    public $subLayout = '@shop/views/layouts/main';
+    public function init()
+    {
+        parent::init();
+        $this->subLayout = Yii::$app->getModule('shop')->getBasePath() . '/views/layouts/main';
+    }
 
     public function actionIndex()
     {

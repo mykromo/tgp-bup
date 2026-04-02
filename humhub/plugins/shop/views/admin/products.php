@@ -8,6 +8,7 @@ $this->title = Yii::t('ShopModule.base', 'Manage Products');
     <strong><i class="fa fa-cube"></i> <?= $this->title ?></strong>
     <div class="pull-right">
         <a href="<?= Url::to(['/shop/admin/create-product']) ?>" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> <?= Yii::t('ShopModule.base', 'Add Product') ?></a>
+        <a href="<?= Url::to(['/shop/admin/stores']) ?>" class="btn btn-default btn-sm"><i class="fa fa-store"></i> <?= Yii::t('ShopModule.base', 'All Stores') ?></a>
         <a href="<?= Url::to(['/shop/vendor/applications']) ?>" class="btn btn-default btn-sm"><i class="fa fa-users"></i> <?= Yii::t('ShopModule.base', 'Applications') ?></a>
         <a href="<?= Url::to(['/shop/admin/orders']) ?>" class="btn btn-default btn-sm"><i class="fa fa-list"></i> <?= Yii::t('ShopModule.base', 'Orders') ?></a>
         <a href="<?= Url::to(['/shop/admin/settings']) ?>" class="btn btn-default btn-sm"><i class="fa fa-cog"></i> <?= Yii::t('ShopModule.base', 'Settings') ?></a>

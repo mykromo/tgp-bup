@@ -68,7 +68,7 @@ class ShopNotify
         static::notifySeller($order, $sellerSubject, $sellerBody);
     }
 
-    private static function sendEmail(string $to, string $subject, string $body): void
+    public static function sendEmail(string $to, string $subject, string $body): void
     {
         try {
             Yii::$app->mailer->compose()

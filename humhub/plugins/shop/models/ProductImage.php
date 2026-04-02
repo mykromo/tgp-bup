@@ -67,12 +67,15 @@ class ProductImage extends ActiveRecord
         $newW = (int) round($origW * $ratio);
         $newH = (int) round($origH * $ratio);
 
-        $src = match ($type) {
-            IMAGETYPE_JPEG => imagecreatefromjpeg($sourcePath),
-            IMAGETYPE_PNG => imagecreatefrompng($sourcePath),
-            IMAGETYPE_WEBP => function_exists('imagecreatefromwebp') ? imagecreatefromwebp($sourcePath) : null,
-            default => null,
-        };
+        $creators = [
+            IMAGETYPE_JPEG => 'imagecreatefromjpeg',
+            IMAGETYPE_PNG => 'imagecreatefrompng',
+        ];
+        if (defined('IMAGETYPE_WEBP')) {
+            $creators[IMAGETYPE_WEBP] = 'imagecreatefromwebp';
+        }
+
+        $src = isset($creators[$type]) ? $creators[$type]($sourcePath) : null;
 
         if (!$src) return false;
 
@@ -86,12 +89,14 @@ class ProductImage extends ActiveRecord
 
         imagecopyresampled($dst, $src, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
 
-        $result = match ($type) {
-            IMAGETYPE_JPEG => imagejpeg($dst, $destPath, 85),
-            IMAGETYPE_PNG => imagepng($dst, $destPath, 8),
-            IMAGETYPE_WEBP => function_exists('imagewebp') ? imagewebp($dst, $destPath, 85) : false,
-            default => false,
-        };
+        $result = false;
+        if ($type === IMAGETYPE_JPEG) {
+            $result = imagejpeg($dst, $destPath, 85);
+        } elseif ($type === IMAGETYPE_PNG) {
+            $result = imagepng($dst, $destPath, 8);
+        } elseif (defined('IMAGETYPE_WEBP') && $type === IMAGETYPE_WEBP && function_exists('imagewebp')) {
+            $result = imagewebp($dst, $destPath, 85);
+        }
 
         imagedestroy($src);
         imagedestroy($dst);
