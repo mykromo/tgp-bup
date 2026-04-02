@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 use humhub\libs\Html;
 use yii\helpers\Url;
 $coverUrl = $vendor->cover_path ? Yii::getAlias('@web') . '/' . $vendor->cover_path : '';
@@ -21,10 +21,12 @@ $pw = 140; $ph = 140;
 <h1 class="space"><?= Html::encode($vendor->shop_name) ?></h1>
 <h2 class="space"><?= Html::encode($vendor->tagline ?: '') ?></h2>
 </div>
+
 <?php if ($isOwner): ?>
 <div class="image-upload-buttons" style="display:none" id="cover-btns">
 <?= Html::beginForm(Url::to(['/shop/seller/upload-cover']), 'post', ['enctype' => 'multipart/form-data', 'style' => 'display:inline']) ?>
-<label class="btn btn-info btn-sm profile-image-upload" style="margin:0;cursor:pointer" title="Upload cover"><i class="fa fa-cloud-upload"></i><input type="file" name="cover" accept=".jpg,.jpeg,.png,.webp" style="display:none" onchange="this.form.submit()"></label>
+<label class="btn btn-info btn-sm profile-image-upload" style="margin:0;cursor:pointer" title="Upload cover"><i class="fa fa-cloud-upload"></i>
+<input type="file" name="cover" accept=".jpg,.jpeg,.png,.webp" style="display:none" onchange="this.form.submit()"></label>
 <?= Html::endForm() ?>
 <?php if ($coverUrl): ?>
 <a href="<?= Url::to(['/shop/seller/delete-cover']) ?>" class="btn btn-danger btn-sm" data-method="post" data-confirm="Remove cover?"><i class="fa fa-trash"></i></a>
@@ -37,12 +39,14 @@ $pw = 140; $ph = 140;
 <img src="<?= Html::encode($logoUrl) ?>" class="img-profile-header-background profile-user-photo" style="width:<?= $pw-10 ?>px;height:<?= $ph-10 ?>px;border-radius:3px;object-fit:cover" alt="">
 <?php else: ?>
 <div style="width:<?= $pw-10 ?>px;height:<?= $ph-10 ?>px;border-radius:3px;background:<?= $vendor->getPlaceholderColor() ?>;display:flex;align-items:center;justify-content:center" class="img-profile-header-background profile-user-photo">
-<span style="font-size:36px;font-weight:700;color:#fff"><?= Html::encode($vendor->getInitials()) ?></span></div>
+<span style="font-size:36px;font-weight:700;color:#fff"><?= Html::encode($vendor->getInitials()) ?></span>
+</div>
 <?php endif; ?>
 <?php if ($isOwner): ?>
 <div class="image-upload-buttons" style="display:none" id="logo-btns">
 <?= Html::beginForm(Url::to(['/shop/seller/upload-logo']), 'post', ['enctype' => 'multipart/form-data', 'style' => 'display:inline']) ?>
-<label class="btn btn-info btn-sm profile-image-upload" style="margin:0;cursor:pointer" title="Upload logo"><i class="fa fa-cloud-upload"></i><input type="file" name="logo" accept=".jpg,.jpeg,.png,.webp" style="display:none" onchange="this.form.submit()"></label>
+<label class="btn btn-info btn-sm profile-image-upload" style="margin:0;cursor:pointer" title="Upload logo"><i class="fa fa-cloud-upload"></i>
+<input type="file" name="logo" accept=".jpg,.jpeg,.png,.webp" style="display:none" onchange="this.form.submit()"></label>
 <?= Html::endForm() ?>
 <?php if ($logoUrl): ?>
 <a href="<?= Url::to(['/shop/seller/delete-logo']) ?>" class="btn btn-danger btn-sm" data-method="post" data-confirm="Remove logo?"><i class="fa fa-trash"></i></a>
@@ -51,7 +55,10 @@ $pw = 140; $ph = 140;
 <?php endif; ?>
 </div>
 </div>
-<div class="panel-body"><div class="panel-profile-controls"><div class="row"><div class="col-md-12">
+
+<div class="panel-body">
+<div class="panel-profile-controls">
+<div class="row"><div class="col-md-12">
 <div class="statistics pull-left">
 <div class="pull-left entry"><span class="count"><?= $productCount ?></span><br><span class="title">Products</span></div>
 <div class="pull-left entry"><span class="count"><?= $followerCount ?></span><br><span class="title">Followers</span></div>
@@ -65,16 +72,25 @@ $pw = 140; $ph = 140;
 <a href="<?= Url::to(['/shop/seller/dashboard']) ?>" class="btn btn-default btn-sm"><i class="fa fa-cog"></i></a>
 <?php endif; ?>
 </div>
-</div></div></div></div>
+</div></div>
+</div>
+</div>
 </div>
 <?php if ($vendor->status === \humhub\modules\shop\models\Vendor::STATUS_SUSPENDED): ?>
 <div class="alert alert-warning"><i class="fa fa-exclamation-triangle"></i> This store is currently suspended.</div>
 <?php endif; ?>
 <?php if ($isAdmin): ?>
-<div class="alert alert-info" style="display:flex;align-items:center;justify-content:space-between"><span><i class="fa fa-shield"></i> Viewing as administrator for investigation.</span><a href="<?= Url::to(['/shop/admin/stores']) ?>" class="btn btn-default btn-sm"><i class="fa fa-arrow-left"></i> Back to Admin</a></div>
+<div class="alert alert-info" style="display:flex;align-items:center;justify-content:space-between">
+<span><i class="fa fa-shield"></i> Viewing as administrator for investigation.</span>
+<a href="<?= Url::to(['/shop/admin/stores']) ?>" class="btn btn-default btn-sm"><i class="fa fa-arrow-left"></i> Back to Admin</a>
+</div>
 <?php endif; ?>
 <?php if ($isOwner): ?>
 <script>
-(function(){var c=document.getElementById('cover-btns'),l=document.getElementById('logo-btns');if(c){var p=c.parentNode;p.onmouseenter=function(){c.style.display=''};p.onmouseleave=function(){c.style.display='none'}}if(l){var q=l.parentNode;q.onmouseenter=function(){l.style.display=''};q.onmouseleave=function(){l.style.display='none'}}})();
+(function(){
+var c=document.getElementById('cover-btns'),l=document.getElementById('logo-btns');
+if(c){var cp=c.parentNode;cp.onmouseenter=function(){c.style.display=''};cp.onmouseleave=function(){c.style.display='none'}}
+if(l){var lp=l.parentNode;lp.onmouseenter=function(){l.style.display=''};lp.onmouseleave=function(){l.style.display='none'}}
+})();
 </script>
 <?php endif; ?>
