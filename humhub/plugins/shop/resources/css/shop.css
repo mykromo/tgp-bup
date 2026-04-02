@@ -190,14 +190,21 @@
    profile-user-photo, statistics, etc.
    ══════════════════════════════════════════ */
 
-/* Banner placeholder when no cover image */
-.store-banner-placeholder { width: 100%; height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+/* Banner placeholder when no cover image — plain gray like Space default */
+.store-banner-placeholder { width: 100%; height: 100%; background: #d5d5d5; }
 
-/* Logo placeholder when no profile image */
-.store-profile-image-placeholder { width: 130px; height: 130px; border-radius: 3px; border: 3px solid #fff; background: #e8e8e8; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
-.store-profile-image-placeholder i { font-size: 40px; color: #bbb; }
+/* Logo placeholder when no profile image — uses inline background color from model */
+.store-profile-image-placeholder { width: 130px; height: 130px; border-radius: 4px; border: 3px solid #fff; background: #34295e; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
 
 /* Image upload buttons — rely on HumHub native .image-upload-buttons positioning */
+
+/* Store directory cards — visible against panel background */
+.panel-body .card.card-space .card-panel { border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,.08); background: #fff; }
+.panel-body .card.card-space .card-panel:hover { box-shadow: 0 3px 10px rgba(0,0,0,.12); }
+[data-ui-theme="dark"] .panel-body .card.card-space .card-panel,
+.theme-dark .panel-body .card.card-space .card-panel { border-color: #444; background: #2b2b2b; }
+[data-ui-theme="dark"] .panel-body .card.card-space .card-panel:hover,
+.theme-dark .panel-body .card.card-space .card-panel:hover { box-shadow: 0 3px 10px rgba(0,0,0,.3); }
 /* The native CSS positions these at bottom of the container, visible on hover */
 
 /* Left navigation for store (matches Space left-navigation) */
@@ -212,11 +219,9 @@
 
 /* Dark mode store profile */
 [data-ui-theme="dark"] .store-banner-placeholder,
-.theme-dark .store-banner-placeholder { background: linear-gradient(135deg, #2a3a5c 0%, #3a2a5c 100%); }
+.theme-dark .store-banner-placeholder { background: #3a3a3a; }
 [data-ui-theme="dark"] .store-profile-image-placeholder,
-.theme-dark .store-profile-image-placeholder { border-color: #2b2b2b; background: #3a3a3a; }
-[data-ui-theme="dark"] .store-profile-image-placeholder i,
-.theme-dark .store-profile-image-placeholder i { color: #666; }
+.theme-dark .store-profile-image-placeholder { border-color: #2b2b2b; background: #2a2050; }
 [data-ui-theme="dark"] #store-main-menu .list-group-item,
 .theme-dark #store-main-menu .list-group-item { color: #ccc; border-color: #3a3a3a; }
 [data-ui-theme="dark"] #store-main-menu .list-group-item:hover,

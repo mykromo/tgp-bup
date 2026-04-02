@@ -163,6 +163,18 @@ class StoreController extends Controller
                     '<p>A new order <strong>' . $order->order_number . '</strong> for <strong>' . $product->name . '</strong> has been placed by <strong>' . $user->displayName . '</strong>.</p>'
                 );
 
+                // Send receipt email to buyer
+                try {
+                    $receiptHtml = \humhub\modules\shop\helpers\Receipt::generateHtml($order);
+                    \humhub\modules\shop\helpers\ShopNotify::sendEmail(
+                        $user->email,
+                        'Receipt for Order ' . $order->order_number,
+                        $receiptHtml
+                    );
+                } catch (\Throwable $e) {
+                    Yii::error('Receipt email failed: ' . $e->getMessage(), 'shop');
+                }
+
                 return $this->redirect(['/shop/store/order-confirmation', 'id' => $order->id]);
             }
         }
@@ -180,6 +192,24 @@ class StoreController extends Controller
         $order = Order::findOne(['id' => $id, 'user_id' => Yii::$app->user->id]);
         if (!$order) throw new NotFoundHttpException();
         return $this->render('order-confirmation', ['order' => $order]);
+    }
+
+    /**
+     * Download receipt as HTML file.
+     */
+    public function actionDownloadReceipt($id)
+    {
+        if (Yii::$app->user->isGuest) return $this->redirect(Yii::$app->user->loginUrl);
+        $order = Order::findOne(['id' => $id, 'user_id' => Yii::$app->user->id]);
+        if (!$order) throw new NotFoundHttpException();
+
+        $html = \humhub\modules\shop\helpers\Receipt::generateDownloadHtml($order);
+        $fileName = 'receipt-' . $order->order_number . '.html';
+
+        return Yii::$app->response->sendContentAsFile($html, $fileName, [
+            'mimeType' => 'text/html',
+            'inline' => false,
+        ]);
     }
 
     /**

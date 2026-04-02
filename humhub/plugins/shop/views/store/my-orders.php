@@ -25,6 +25,7 @@ $this->title = Yii::t('ShopModule.base', 'My Orders');
         <?php if ($hasPending): ?><span class="label label-warning">Request Pending</span><?php endif; ?>
     </td>
     <td style="white-space:nowrap">
+        <a href="<?= Url::to(['/shop/store/download-receipt', 'id' => $o->id]) ?>" class="btn btn-default btn-xs" data-pjax-prevent title="Download Receipt"><i class="fa fa-download"></i></a>
         <?php if ($o->status === Order::STATUS_PAID): ?>
             <a href="<?= Url::to(['/shop/store/edit-order', 'id' => $o->id]) ?>" class="btn btn-default btn-xs"><i class="fa fa-pencil"></i> Edit</a>
             <a href="<?= Url::to(['/shop/store/cancel-order', 'id' => $o->id]) ?>" class="btn btn-danger btn-xs" data-method="post" data-confirm="Cancel this order?"><i class="fa fa-times"></i> Cancel</a>

@@ -2,21 +2,29 @@
 use humhub\libs\Html;
 use yii\helpers\Url;
 $this->title = Yii::t('ShopModule.base', 'Order Confirmed');
+$receiptHtml = \humhub\modules\shop\helpers\Receipt::generateHtml($order);
 ?>
 <div class="panel panel-default">
-<div class="panel-heading"><strong><i class="fa fa-check-circle"></i> <?= Yii::t('ShopModule.base', 'Order Confirmed') ?></strong></div>
-<div class="panel-body text-center" style="padding:30px">
-    <i class="fa fa-check-circle text-success" style="font-size:64px"></i>
-    <h3><?= Yii::t('ShopModule.base', 'Thank you for your order!') ?></h3>
-    <p class="text-muted"><?= Yii::t('ShopModule.base', 'Your order has been submitted and is pending verification.') ?></p>
-    <div class="well" style="display:inline-block;text-align:left">
-        <p><strong><?= Yii::t('ShopModule.base', 'Order Number:') ?></strong> <?= Html::encode($order->order_number) ?></p>
-        <p><strong><?= Yii::t('ShopModule.base', 'Total:') ?></strong> <?= $order->formatTotal() ?></p>
-        <p><strong><?= Yii::t('ShopModule.base', 'Payment Reference:') ?></strong> <?= Html::encode($order->payment_reference) ?></p>
-        <p><strong><?= Yii::t('ShopModule.base', 'Payment Method:') ?></strong> <?= Html::encode($order->payment_method) ?></p>
-        <p><strong><?= Yii::t('ShopModule.base', 'Status:') ?></strong> <span class="label label-info"><?= Yii::t('ShopModule.base', 'Awaiting Verification') ?></span></p>
+<div class="panel-heading">
+    <strong><i class="fa fa-check-circle"></i> <?= Yii::t('ShopModule.base', 'Order Confirmed') ?></strong>
+    <div class="pull-right">
+        <a href="<?= Url::to(['/shop/store/download-receipt', 'id' => $order->id]) ?>" class="btn btn-default btn-sm" data-pjax-prevent><i class="fa fa-download"></i> Download Receipt</a>
     </div>
-    <br><br>
+</div>
+<div class="panel-body">
+    <div class="text-center" style="margin-bottom:20px">
+        <i class="fa fa-check-circle text-success" style="font-size:48px"></i>
+        <h3 style="margin-top:10px"><?= Yii::t('ShopModule.base', 'Thank you for your order!') ?></h3>
+        <p class="text-muted"><?= Yii::t('ShopModule.base', 'Your order has been submitted. A receipt has been sent to your email.') ?></p>
+    </div>
+
+    <!-- Inline receipt -->
+    <div style="border:1px solid #eee;border-radius:4px;padding:10px;background:#fafafa">
+        <?= $receiptHtml ?>
+    </div>
+
+    <hr>
     <a href="<?= Url::to(['/shop/store/index']) ?>" class="btn btn-default"><i class="fa fa-arrow-left"></i> <?= Yii::t('ShopModule.base', 'Back to Shop') ?></a>
     <a href="<?= Url::to(['/shop/store/my-orders']) ?>" class="btn btn-primary"><i class="fa fa-list"></i> <?= Yii::t('ShopModule.base', 'My Orders') ?></a>
+    <a href="<?= Url::to(['/shop/store/download-receipt', 'id' => $order->id]) ?>" class="btn btn-default pull-right" data-pjax-prevent><i class="fa fa-download"></i> Download Receipt</a>
 </div></div>

@@ -17,13 +17,13 @@ $this->title = Yii::t('ShopModule.base', 'Following');
 ?>
 <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" style="margin-bottom:15px">
     <div class="panel panel-default" style="margin:0">
-        <div style="height:80px;background:<?= $coverUrl ? 'url(' . Html::encode($coverUrl) . ') center/cover' : 'linear-gradient(135deg,#667eea,#764ba2)' ?>;border-radius:4px 4px 0 0"></div>
+        <div style="height:80px;background:<?= $coverUrl ? 'url(' . Html::encode($coverUrl) . ') center/cover' : '#d5d5d5' ?>;border-radius:4px 4px 0 0"></div>
         <div class="panel-body text-center" style="margin-top:-30px">
             <a href="<?= $storeUrl ?>">
                 <?php if ($logoUrl): ?>
-                    <img src="<?= Html::encode($logoUrl) ?>" style="width:60px;height:60px;border-radius:3px;object-fit:cover;border:3px solid #fff" alt="">
+                    <img src="<?= Html::encode($logoUrl) ?>" style="width:60px;height:60px;border-radius:4px;object-fit:cover;border:3px solid #fff" alt="">
                 <?php else: ?>
-                    <div style="width:60px;height:60px;border-radius:3px;background:#e8e8e8;border:3px solid #fff;display:inline-flex;align-items:center;justify-content:center"><i class="fa fa-shopping-bag" style="font-size:24px;color:#bbb"></i></div>
+                    <div style="width:60px;height:60px;border-radius:4px;background:<?= $v->getPlaceholderColor() ?>;border:3px solid #fff;display:inline-flex;align-items:center;justify-content:center"><span style="font-size:20px;font-weight:700;color:#fff"><?= Html::encode($v->getInitials()) ?></span></div>
                 <?php endif; ?>
             </a>
             <h5 style="margin:8px 0 2px"><a href="<?= $storeUrl ?>"><?= Html::encode($v->shop_name) ?></a></h5>

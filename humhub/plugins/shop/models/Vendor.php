@@ -117,4 +117,34 @@ class Vendor extends ActiveRecord
     {
         return (int) $this->getProducts()->where(['is_active' => 1])->count();
     }
+
+    /**
+     * Get first two letters of the store name as initials for placeholder logo.
+     */
+    public function getInitials(): string
+    {
+        $name = trim($this->shop_name);
+        if (empty($name)) return '?';
+        // Use first letter of first two words, or first two chars if single word
+        $words = preg_split('/\s+/', $name);
+        if (count($words) >= 2) {
+            return mb_strtoupper(mb_substr($words[0], 0, 1) . mb_substr($words[1], 0, 1));
+        }
+        return mb_strtoupper(mb_substr($name, 0, 2));
+    }
+
+    /**
+     * Get a deterministic random background color for the placeholder logo.
+     * Uses vendor ID as seed so the color is consistent per store.
+     */
+    public function getPlaceholderColor(): string
+    {
+        $colors = [
+            '#34295e', '#1a5276', '#1e8449', '#b9770e', '#922b21',
+            '#6c3483', '#2e86c1', '#17a589', '#ca6f1e', '#cb4335',
+            '#2874a6', '#148f77', '#7d3c98', '#d4ac0d', '#a93226',
+            '#1f618d', '#117a65', '#884ea0', '#b7950b', '#c0392b',
+        ];
+        return $colors[($this->id ?? 0) % count($colors)];
+    }
 }

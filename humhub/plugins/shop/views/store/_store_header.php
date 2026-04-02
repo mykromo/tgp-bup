@@ -53,8 +53,8 @@ $followerCount = $vendor->getFollowerCount();
                 <img src="<?= Html::encode($logoUrl) ?>" class="img-profile-header-background profile-user-photo"
                      style="width:130px;height:130px;border-radius:3px;object-fit:cover" alt="">
             <?php else: ?>
-                <div class="store-profile-image-placeholder">
-                    <i class="fa fa-shopping-bag"></i>
+                <div class="store-profile-image-placeholder" style="background:<?= $vendor->getPlaceholderColor() ?>">
+                    <span style="font-size:36px;font-weight:700;color:#fff;letter-spacing:1px"><?= Html::encode($vendor->getInitials()) ?></span>
                 </div>
             <?php endif; ?>
 

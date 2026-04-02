@@ -27,7 +27,7 @@ humhub\assets\CardsAsset::register($this);
             $followerCount = $v->getFollowerCount();
             $coverStyle = $coverUrl
                 ? 'background-image:url(\'' . Html::encode($coverUrl) . '\');background-size:cover;background-position:center'
-                : 'background:linear-gradient(135deg,#667eea 0%,#764ba2 100%)';
+                : 'background:#d5d5d5';
         ?>
         <div class="card card-space col-lg-3 col-md-4 col-sm-6 col-xs-12">
             <div class="card-panel<?= $v->status === Vendor::STATUS_SUSPENDED ? ' card-archived' : '' ?>">
@@ -35,10 +35,10 @@ humhub\assets\CardsAsset::register($this);
                 <div class="card-header">
                     <a href="<?= $storeUrl ?>" class="card-image-link">
                         <?php if ($logoUrl): ?>
-                            <img src="<?= Html::encode($logoUrl) ?>" class="space-profile-image" style="width:94px;height:94px;border-radius:3px;object-fit:cover;border:3px solid #fff" alt="">
+                            <img src="<?= Html::encode($logoUrl) ?>" class="space-profile-image" style="width:94px;height:94px;border-radius:4px;object-fit:cover;border:3px solid #fff" alt="">
                         <?php else: ?>
-                            <div style="width:94px;height:94px;border-radius:3px;background:#e8e8e8;border:3px solid #fff;display:flex;align-items:center;justify-content:center">
-                                <i class="fa fa-shopping-bag" style="font-size:36px;color:#bbb"></i>
+                            <div style="width:94px;height:94px;border-radius:4px;background:<?= $v->getPlaceholderColor() ?>;border:3px solid #fff;display:flex;align-items:center;justify-content:center">
+                                <span style="font-size:32px;font-weight:700;color:#fff;letter-spacing:1px"><?= Html::encode($v->getInitials()) ?></span>
                             </div>
                         <?php endif; ?>
                     </a>
@@ -50,8 +50,9 @@ humhub\assets\CardsAsset::register($this);
                     <strong class="card-title"><a href="<?= $storeUrl ?>"><?= Html::encode($v->shop_name) ?></a></strong>
                     <?php if ($v->tagline): ?>
                         <div class="card-details"><?= Html::encode($v->tagline) ?></div>
-                    <?php elseif ($v->description): ?>
-                        <div class="card-details"><?= Html::encode(mb_substr($v->description, 0, 100)) ?><?= mb_strlen($v->description) > 100 ? '...' : '' ?></div>
+                    <?php endif; ?>
+                    <?php if ($v->user): ?>
+                        <div class="card-details" style="margin-top:4px"><small class="text-muted"><i class="fa fa-user"></i> <?= Html::encode($v->user->displayName) ?></small></div>
                     <?php endif; ?>
                 </div>
                 <div class="card-footer">
