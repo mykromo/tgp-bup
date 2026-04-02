@@ -12,7 +12,7 @@ class Product extends ActiveRecord
     public function rules()
     {
         return [
-            [['space_id', 'name', 'price'], 'required'],
+            [['name', 'price'], 'required'],
             [['space_id', 'stock', 'sort_order'], 'integer'],
             [['name'], 'string', 'max' => 255],
             [['description'], 'string'],
@@ -44,5 +44,16 @@ class Product extends ActiveRecord
     public function formatPrice(): string
     {
         return '₱' . number_format((float) $this->price, 2);
+    }
+
+    public function getImages(): \yii\db\ActiveQuery
+    {
+        return $this->hasMany(ProductImage::class, ['product_id' => 'id'])->orderBy(['sort_order' => SORT_ASC]);
+    }
+
+    public function getFirstImageUrl(): ?string
+    {
+        $img = $this->getImages()->one();
+        return $img ? $img->getUrl() : ($this->image_url ?: null);
     }
 }

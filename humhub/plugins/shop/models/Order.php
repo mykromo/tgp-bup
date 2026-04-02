@@ -20,7 +20,7 @@ class Order extends ActiveRecord
     public function rules()
     {
         return [
-            [['space_id', 'user_id', 'total_amount'], 'required'],
+            [['user_id', 'total_amount'], 'required'],
             [['space_id', 'user_id', 'verified_by'], 'integer'],
             [['total_amount'], 'number'],
             [['payment_reference'], 'string', 'max' => 255],

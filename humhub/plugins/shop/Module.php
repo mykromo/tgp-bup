@@ -2,12 +2,10 @@
 
 namespace humhub\modules\shop;
 
-use humhub\modules\content\components\ContentContainerActiveRecord;
-use humhub\modules\content\components\ContentContainerModule;
-use humhub\modules\space\models\Space;
+use humhub\components\Module as BaseModule;
 use Yii;
 
-class Module extends ContentContainerModule
+class Module extends BaseModule
 {
     public $controllerNamespace = 'humhub\modules\shop\controllers';
 
@@ -17,26 +15,13 @@ class Module extends ContentContainerModule
         Yii::setAlias('@shop', $this->getBasePath());
     }
 
-    public function getContentContainerTypes()
-    {
-        return [Space::class];
-    }
-
-    public function getPermissions($contentContainer = null)
-    {
-        if ($contentContainer !== null) {
-            return [new permissions\ManageShop()];
-        }
-        return [];
-    }
-
     public function getName()
     {
-        return Yii::t('ShopModule.base', 'Chapter Shop');
+        return Yii::t('ShopModule.base', 'Shop');
     }
 
     public function getDescription()
     {
-        return Yii::t('ShopModule.base', 'Sell products with manual payment and reference number tracking');
+        return Yii::t('ShopModule.base', 'System-wide shop with manual payment and reference number tracking');
     }
 }

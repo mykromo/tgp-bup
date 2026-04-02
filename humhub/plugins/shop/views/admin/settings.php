@@ -1,7 +1,7 @@
 <?php
 use humhub\libs\Html;
 use yii\bootstrap\ActiveForm;
-$cc = $contentContainer;
+use yii\helpers\Url;
 $this->title = Yii::t('ShopModule.base', 'Payment Settings');
 ?>
 <div class="panel panel-default">
@@ -16,6 +16,6 @@ $this->title = Yii::t('ShopModule.base', 'Payment Settings');
     ->hint(Yii::t('ShopModule.base', 'Comma-separated list. e.g.: GCash,Bank Transfer,Cash,PayMaya')) ?>
 <hr>
 <?= Html::submitButton(Yii::t('ShopModule.base', 'Save Settings'), ['class' => 'btn btn-primary']) ?>
-<a href="<?= $cc->createUrl('/shop/admin/products') ?>" class="btn btn-default">Back</a>
+<a href="<?= Url::to(['/shop/admin/products']) ?>" class="btn btn-default">Back</a>
 <?php ActiveForm::end(); ?>
 </div></div>

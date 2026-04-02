@@ -1,6 +1,6 @@
 <?php
 use humhub\libs\Html;
-$cc = $contentContainer;
+use yii\helpers\Url;
 $this->title = Yii::t('ShopModule.base', 'Order Confirmed');
 ?>
 <div class="panel panel-default">
@@ -17,6 +17,6 @@ $this->title = Yii::t('ShopModule.base', 'Order Confirmed');
         <p><strong><?= Yii::t('ShopModule.base', 'Status:') ?></strong> <span class="label label-info"><?= Yii::t('ShopModule.base', 'Awaiting Verification') ?></span></p>
     </div>
     <br><br>
-    <a href="<?= $cc->createUrl('/shop/store/index') ?>" class="btn btn-default"><i class="fa fa-arrow-left"></i> <?= Yii::t('ShopModule.base', 'Back to Shop') ?></a>
-    <a href="<?= $cc->createUrl('/shop/store/my-orders') ?>" class="btn btn-primary"><i class="fa fa-list"></i> <?= Yii::t('ShopModule.base', 'My Orders') ?></a>
+    <a href="<?= Url::to(['/shop/store/index']) ?>" class="btn btn-default"><i class="fa fa-arrow-left"></i> <?= Yii::t('ShopModule.base', 'Back to Shop') ?></a>
+    <a href="<?= Url::to(['/shop/store/my-orders']) ?>" class="btn btn-primary"><i class="fa fa-list"></i> <?= Yii::t('ShopModule.base', 'My Orders') ?></a>
 </div></div>

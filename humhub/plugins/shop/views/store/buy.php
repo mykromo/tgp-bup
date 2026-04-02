@@ -1,6 +1,6 @@
 <?php
 use humhub\libs\Html;
-$cc = $contentContainer;
+use yii\helpers\Url;
 $this->title = Yii::t('ShopModule.base', 'Checkout');
 ?>
 <div class="panel panel-default">
@@ -18,7 +18,7 @@ $this->title = Yii::t('ShopModule.base', 'Checkout');
     <?= nl2br(Html::encode($settings->payment_instructions)) ?>
 </div>
 
-<?= Html::beginForm($cc->createUrl('/shop/store/buy', ['id' => $product->id]), 'post') ?>
+<?= Html::beginForm(Url::to(['/shop/store/buy', 'id' => $product->id]), 'post') ?>
 
 <div class="row">
     <div class="col-sm-6">
@@ -55,7 +55,7 @@ $this->title = Yii::t('ShopModule.base', 'Checkout');
 <hr>
 <?= Html::hiddenInput('confirm', '1') ?>
 <?= Html::submitButton('<i class="fa fa-check"></i> ' . Yii::t('ShopModule.base', 'Submit Order'), ['class' => 'btn btn-success']) ?>
-<a href="<?= $cc->createUrl('/shop/store/index') ?>" class="btn btn-default"><?= Yii::t('ShopModule.base', 'Cancel') ?></a>
+<a href="<?= Url::to(['/shop/store/index']) ?>" class="btn btn-default"><?= Yii::t('ShopModule.base', 'Cancel') ?></a>
 
 <?= Html::endForm() ?>
 </div></div>

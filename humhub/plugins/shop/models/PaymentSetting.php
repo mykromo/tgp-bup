@@ -32,6 +32,19 @@ class PaymentSetting extends ActiveRecord
         return $setting;
     }
 
+    public static function getGlobal(): self
+    {
+        $setting = static::find()->where(['space_id' => null])->one();
+        if (!$setting) {
+            $setting = new static();
+            $setting->space_id = null;
+            $setting->payment_instructions = "Please send payment via GCash, bank transfer, or cash.\nInclude your Order Number as reference.\nOnce paid, submit your payment reference number.";
+            $setting->accepted_methods = 'GCash,Bank Transfer,Cash';
+            $setting->save(false);
+        }
+        return $setting;
+    }
+
     public function getMethodsList(): array
     {
         return array_map('trim', explode(',', $this->accepted_methods ?? ''));

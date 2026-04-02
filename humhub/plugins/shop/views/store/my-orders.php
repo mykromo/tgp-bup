@@ -1,7 +1,7 @@
 <?php
 use humhub\libs\Html;
 use humhub\modules\shop\models\Order;
-$cc = $contentContainer;
+use yii\helpers\Url;
 $this->title = Yii::t('ShopModule.base', 'My Orders');
 ?>
 <div class="panel panel-default">
@@ -25,5 +25,5 @@ $this->title = Yii::t('ShopModule.base', 'My Orders');
 </tbody></table></div>
 <?= \yii\widgets\LinkPager::widget(['pagination' => $pagination]) ?>
 <?php endif; ?>
-<a href="<?= $cc->createUrl('/shop/store/index') ?>" class="btn btn-default"><i class="fa fa-arrow-left"></i> <?= Yii::t('ShopModule.base', 'Back to Shop') ?></a>
+<a href="<?= Url::to(['/shop/store/index']) ?>" class="btn btn-default"><i class="fa fa-arrow-left"></i> <?= Yii::t('ShopModule.base', 'Back to Shop') ?></a>
 </div></div>

@@ -1,14 +1,13 @@
 <?php
 use humhub\libs\Html;
 use humhub\modules\shop\models\Order;
-$cc = $contentContainer;
+use yii\helpers\Url;
 $this->title = Yii::t('ShopModule.base', 'Orders');
 ?>
 <div class="panel panel-default">
 <div class="panel-heading"><strong><i class="fa fa-list"></i> <?= $this->title ?></strong></div>
 <div class="panel-body">
-<form method="get" class="form-inline" style="margin-bottom:15px">
-    <input type="hidden" name="cguid" value="<?= $cc->guid ?>">
+<form method="get" action="<?= Url::to(['/shop/admin/orders']) ?>" class="form-inline" style="margin-bottom:15px">
     <select name="status" class="form-control input-sm" onchange="this.form.submit()">
         <option value="">All Statuses</option>
         <?php foreach (Order::getStatusLabels() as $k => $v): ?>
@@ -31,11 +30,11 @@ $this->title = Yii::t('ShopModule.base', 'Orders');
     <td><?= Html::encode($o->payment_method) ?></td>
     <td><span class="label label-<?= Order::getStatusBadge($o->status) ?>"><?= Order::getStatusLabels()[$o->status] ?? $o->status ?></span></td>
     <td style="white-space:nowrap"><?= Yii::$app->formatter->asDatetime($o->created_at) ?></td>
-    <td><a href="<?= $cc->createUrl('/shop/admin/view-order', ['id' => $o->id]) ?>" class="btn btn-default btn-xs">View</a></td>
+    <td><a href="<?= Url::to(['/shop/admin/view-order', 'id' => $o->id]) ?>" class="btn btn-default btn-xs">View</a></td>
 </tr>
 <?php endforeach; ?>
 </tbody></table></div>
 <?= \yii\widgets\LinkPager::widget(['pagination' => $pagination]) ?>
 <?php endif; ?>
-<a href="<?= $cc->createUrl('/shop/admin/products') ?>" class="btn btn-default"><i class="fa fa-arrow-left"></i> Back</a>
+<a href="<?= Url::to(['/shop/admin/products']) ?>" class="btn btn-default"><i class="fa fa-arrow-left"></i> Back</a>
 </div></div>

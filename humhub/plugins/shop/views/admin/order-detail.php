@@ -1,7 +1,7 @@
 <?php
 use humhub\libs\Html;
 use humhub\modules\shop\models\Order;
-$cc = $contentContainer;
+use yii\helpers\Url;
 $this->title = Yii::t('ShopModule.base', 'Order') . ' ' . $order->order_number;
 ?>
 <div class="panel panel-default">
@@ -36,11 +36,11 @@ $this->title = Yii::t('ShopModule.base', 'Order') . ' ' . $order->order_number;
     </div>
 </div>
 <hr>
-<a href="<?= $cc->createUrl('/shop/admin/orders') ?>" class="btn btn-default"><i class="fa fa-arrow-left"></i> Back</a>
+<a href="<?= Url::to(['/shop/admin/orders']) ?>" class="btn btn-default"><i class="fa fa-arrow-left"></i> Back</a>
 <?php if ($order->status === Order::STATUS_PAID): ?>
-    <a href="<?= $cc->createUrl('/shop/admin/verify-order', ['id' => $order->id]) ?>" class="btn btn-success pull-right" data-method="post" data-confirm="Verify this payment?"><i class="fa fa-check"></i> Verify Payment</a>
+    <a href="<?= Url::to(['/shop/admin/verify-order', 'id' => $order->id]) ?>" class="btn btn-success pull-right" data-method="post" data-confirm="Verify this payment?"><i class="fa fa-check"></i> Verify Payment</a>
 <?php endif; ?>
 <?php if (in_array($order->status, [Order::STATUS_PENDING, Order::STATUS_PAID])): ?>
-    <a href="<?= $cc->createUrl('/shop/admin/cancel-order', ['id' => $order->id]) ?>" class="btn btn-danger pull-right" style="margin-right:5px" data-method="post" data-confirm="Cancel this order?"><i class="fa fa-times"></i> Cancel Order</a>
+    <a href="<?= Url::to(['/shop/admin/cancel-order', 'id' => $order->id]) ?>" class="btn btn-danger pull-right" style="margin-right:5px" data-method="post" data-confirm="Cancel this order?"><i class="fa fa-times"></i> Cancel Order</a>
 <?php endif; ?>
 </div></div>

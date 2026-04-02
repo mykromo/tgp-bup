@@ -9,17 +9,19 @@ use yii\base\Event;
 
 class Events extends BaseObject
 {
-    public static function onSpaceMenuInit(Event $event)
+    public static function onTopMenuInit(Event $event)
     {
-        $space = $event->sender->space;
-        if ($space->isModuleEnabled('shop')) {
-            $event->sender->addEntry(new MenuLink([
-                'label' => Yii::t('ShopModule.base', 'Shop'),
-                'url' => $space->createUrl('/shop/store/index'),
-                'icon' => 'shopping-cart',
-                'sortOrder' => 700,
-                'isActive' => MenuLink::isActiveState('shop'),
-            ]));
+        $module = Yii::$app->getModule('shop');
+        if ($module === null) {
+            return;
         }
+
+        $event->sender->addEntry(new MenuLink([
+            'label' => Yii::t('ShopModule.base', 'Shop'),
+            'url' => ['/shop/store/index'],
+            'icon' => 'shopping-cart',
+            'sortOrder' => 500,
+            'isActive' => (Yii::$app->controller && Yii::$app->controller->module && Yii::$app->controller->module->id === 'shop'),
+        ]));
     }
 }

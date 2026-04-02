@@ -2,71 +2,119 @@
 
 namespace humhub\modules\shop\controllers;
 
-use humhub\modules\content\components\ContentContainerController;
+use humhub\components\Controller;
 use humhub\modules\shop\models\Order;
 use humhub\modules\shop\models\PaymentSetting;
 use humhub\modules\shop\models\Product;
-use humhub\modules\shop\permissions\ManageShop;
-use humhub\modules\space\models\Space;
+use humhub\modules\shop\models\ProductImage;
 use Yii;
 use yii\data\Pagination;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
+use yii\web\UploadedFile;
 
-class AdminController extends ContentContainerController
+class AdminController extends Controller
 {
-    public $validContentContainerClasses = [Space::class];
+    public $subLayout = '@shop/views/layouts/main';
 
     private function requireAdmin()
     {
-        if (!$this->contentContainer->permissionManager->can(ManageShop::class)) {
+        if (Yii::$app->user->isGuest || !Yii::$app->user->isAdmin()) {
             throw new ForbiddenHttpException();
         }
     }
 
-    // ── Products ──
-
     public function actionProducts()
     {
         $this->requireAdmin();
-        $products = Product::find()->where(['space_id' => $this->contentContainer->id])->orderBy(['sort_order' => SORT_ASC])->all();
-        return $this->render('products', ['products' => $products, 'contentContainer' => $this->contentContainer]);
+        $products = Product::find()->where(['or', ['space_id' => null], ['space_id' => 0]])->orderBy(['sort_order' => SORT_ASC])->all();
+        return $this->render('products', ['products' => $products]);
     }
 
     public function actionCreateProduct()
     {
         $this->requireAdmin();
         $model = new Product();
-        $model->space_id = $this->contentContainer->id;
+        $model->space_id = null;
         $model->currency = 'PHP';
+        $model->sort_order = 0;
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            $this->handleImageUploads($model);
             $this->view->saved();
-            return $this->redirect($this->contentContainer->createUrl('/shop/admin/products'));
+            return $this->redirect(['/shop/admin/products']);
         }
-        return $this->render('product-form', ['model' => $model, 'contentContainer' => $this->contentContainer]);
+        return $this->render('product-form', ['model' => $model]);
     }
 
     public function actionEditProduct($id)
     {
         $this->requireAdmin();
-        $model = Product::findOne(['id' => $id, 'space_id' => $this->contentContainer->id]);
+        $model = Product::findOne($id);
         if (!$model) throw new NotFoundHttpException();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            $this->handleImageUploads($model);
             $this->view->saved();
-            return $this->redirect($this->contentContainer->createUrl('/shop/admin/products'));
+            return $this->redirect(['/shop/admin/products']);
         }
-        return $this->render('product-form', ['model' => $model, 'contentContainer' => $this->contentContainer]);
+        return $this->render('product-form', ['model' => $model]);
     }
 
-    // ── Orders ──
+    public function actionDeleteImage($id)
+    {
+        $this->requireAdmin();
+        $this->forcePostRequest();
+        $img = ProductImage::findOne($id);
+        if ($img) {
+            $fullPath = Yii::getAlias('@webroot') . '/' . $img->file_path;
+            if (file_exists($fullPath)) @unlink($fullPath);
+            $productId = $img->product_id;
+            $img->delete();
+            return $this->redirect(['/shop/admin/edit-product', 'id' => $productId]);
+        }
+        return $this->redirect(['/shop/admin/products']);
+    }
+
+    private function handleImageUploads(Product $product): void
+    {
+        $files = UploadedFile::getInstancesByName('product_images');
+        $uploadPath = ProductImage::getUploadPath();
+        $maxOrder = (int) ProductImage::find()->where(['product_id' => $product->id])->max('sort_order');
+
+        foreach ($files as $file) {
+            if ($file->size > ProductImage::MAX_FILE_SIZE) continue;
+            if (!in_array(strtolower($file->extension), ProductImage::ALLOWED_EXTENSIONS)) continue;
+
+            $fileName = $product->id . '_' . time() . '_' . mt_rand(100, 999) . '.' . $file->extension;
+            $tempPath = $uploadPath . '/tmp_' . $fileName;
+            $finalPath = $uploadPath . '/' . $fileName;
+
+            if ($file->saveAs($tempPath)) {
+                if (ProductImage::resizeImage($tempPath, $finalPath)) {
+                    if ($tempPath !== $finalPath) @unlink($tempPath);
+
+                    $maxOrder++;
+                    $img = new ProductImage();
+                    $img->product_id = $product->id;
+                    $img->file_name = $file->name;
+                    $img->file_path = 'uploads/shop/products/' . $fileName;
+                    $img->file_size = filesize($finalPath);
+                    $img->sort_order = $maxOrder;
+                    $img->created_at = date('Y-m-d H:i:s');
+                    $img->save(false);
+                } else {
+                    @unlink($tempPath);
+                }
+            }
+        }
+    }
 
     public function actionOrders()
     {
         $this->requireAdmin();
         $status = Yii::$app->request->get('status');
-        $query = Order::find()->where(['shop_order.space_id' => $this->contentContainer->id])->orderBy(['created_at' => SORT_DESC]);
+        $query = Order::find()->orderBy(['created_at' => SORT_DESC]);
         if ($status) $query->andWhere(['status' => $status]);
         $pagination = new Pagination(['totalCount' => $query->count(), 'pageSize' => 20]);
 
@@ -74,24 +122,22 @@ class AdminController extends ContentContainerController
             'orders' => $query->offset($pagination->offset)->limit($pagination->limit)->all(),
             'pagination' => $pagination,
             'selectedStatus' => $status,
-            'contentContainer' => $this->contentContainer,
         ]);
     }
 
     public function actionViewOrder($id)
     {
         $this->requireAdmin();
-        $order = Order::findOne(['id' => $id, 'space_id' => $this->contentContainer->id]);
+        $order = Order::findOne($id);
         if (!$order) throw new NotFoundHttpException();
-
-        return $this->render('order-detail', ['order' => $order, 'contentContainer' => $this->contentContainer]);
+        return $this->render('order-detail', ['order' => $order]);
     }
 
     public function actionVerifyOrder($id)
     {
         $this->requireAdmin();
         $this->forcePostRequest();
-        $order = Order::findOne(['id' => $id, 'space_id' => $this->contentContainer->id]);
+        $order = Order::findOne($id);
         if (!$order) throw new NotFoundHttpException();
 
         $order->status = Order::STATUS_VERIFIED;
@@ -101,43 +147,39 @@ class AdminController extends ContentContainerController
         $order->save(false);
 
         $this->view->saved();
-        return $this->redirect($this->contentContainer->createUrl('/shop/admin/view-order', ['id' => $id]));
+        return $this->redirect(['/shop/admin/view-order', 'id' => $id]);
     }
 
     public function actionCancelOrder($id)
     {
         $this->requireAdmin();
         $this->forcePostRequest();
-        $order = Order::findOne(['id' => $id, 'space_id' => $this->contentContainer->id]);
+        $order = Order::findOne($id);
         if (!$order) throw new NotFoundHttpException();
 
         $order->status = Order::STATUS_CANCELLED;
         $order->save(false);
 
-        // Restore stock
         foreach ($order->items as $item) {
-            $product = $item->product;
-            if ($product && $product->stock !== null) {
-                $product->updateCounters(['stock' => $item->quantity]);
+            if ($item->product && $item->product->stock !== null) {
+                $item->product->updateCounters(['stock' => $item->quantity]);
             }
         }
 
         $this->view->saved();
-        return $this->redirect($this->contentContainer->createUrl('/shop/admin/orders'));
+        return $this->redirect(['/shop/admin/orders']);
     }
-
-    // ── Payment Settings ──
 
     public function actionSettings()
     {
         $this->requireAdmin();
-        $model = PaymentSetting::getForSpace($this->contentContainer->id);
+        $model = PaymentSetting::getGlobal();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             $this->view->saved();
-            return $this->redirect($this->contentContainer->createUrl('/shop/admin/settings'));
+            return $this->redirect(['/shop/admin/settings']);
         }
 
-        return $this->render('settings', ['model' => $model, 'contentContainer' => $this->contentContainer]);
+        return $this->render('settings', ['model' => $model]);
     }
 }
