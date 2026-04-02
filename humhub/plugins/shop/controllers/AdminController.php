@@ -176,6 +176,10 @@ class AdminController extends Controller
         $model = PaymentSetting::getGlobal();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            // Save cache TTL
+            $cacheTtl = max(0, min(86400, (int) Yii::$app->request->post('cacheTtl', 300)));
+            Yii::$app->getModule('shop')->settings->set('cacheTtl', $cacheTtl);
+            \humhub\modules\shop\helpers\ShopCache::flushAll();
             $this->view->saved();
             return $this->redirect(['/shop/admin/settings']);
         }

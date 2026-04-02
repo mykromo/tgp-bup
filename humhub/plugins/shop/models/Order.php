@@ -12,6 +12,7 @@ class Order extends ActiveRecord
     const STATUS_PENDING = 'pending';
     const STATUS_PAID = 'paid';
     const STATUS_VERIFIED = 'verified';
+    const STATUS_REJECTED = 'rejected';
     const STATUS_CANCELLED = 'cancelled';
     const STATUS_REFUNDED = 'refunded';
 
@@ -25,9 +26,9 @@ class Order extends ActiveRecord
             [['total_amount'], 'number'],
             [['payment_reference'], 'string', 'max' => 255],
             [['payment_method'], 'string', 'max' => 100],
-            [['status'], 'in', 'range' => [self::STATUS_PENDING, self::STATUS_PAID, self::STATUS_VERIFIED, self::STATUS_CANCELLED, self::STATUS_REFUNDED]],
-            [['notes', 'buyer_name', 'buyer_email'], 'string'],
-            [['payment_date', 'verified_at'], 'safe'],
+            [['status'], 'in', 'range' => [self::STATUS_PENDING, self::STATUS_PAID, self::STATUS_VERIFIED, self::STATUS_REJECTED, self::STATUS_CANCELLED, self::STATUS_REFUNDED]],
+            [['notes', 'buyer_name', 'buyer_email', 'delivery_address', 'rejection_reason'], 'string'],
+            [['payment_date', 'verified_at', 'rejected_at', 'address_id', 'rejected_by'], 'safe'],
         ];
     }
 
@@ -58,6 +59,7 @@ class Order extends ActiveRecord
             self::STATUS_PENDING => Yii::t('ShopModule.base', 'Pending Payment'),
             self::STATUS_PAID => Yii::t('ShopModule.base', 'Paid (Unverified)'),
             self::STATUS_VERIFIED => Yii::t('ShopModule.base', 'Verified'),
+            self::STATUS_REJECTED => Yii::t('ShopModule.base', 'Rejected'),
             self::STATUS_CANCELLED => Yii::t('ShopModule.base', 'Cancelled'),
             self::STATUS_REFUNDED => Yii::t('ShopModule.base', 'Refunded'),
         ];
@@ -65,7 +67,7 @@ class Order extends ActiveRecord
 
     public static function getStatusBadge(string $status): string
     {
-        $map = ['pending' => 'warning', 'paid' => 'info', 'verified' => 'success', 'cancelled' => 'default', 'refunded' => 'danger'];
+        $map = ['pending' => 'warning', 'paid' => 'info', 'verified' => 'success', 'rejected' => 'danger', 'cancelled' => 'default', 'refunded' => 'danger'];
         return $map[$status] ?? 'default';
     }
 }

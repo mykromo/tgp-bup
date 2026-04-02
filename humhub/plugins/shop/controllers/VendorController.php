@@ -124,6 +124,28 @@ class VendorController extends Controller
         $vendor->reviewed_at = date('Y-m-d H:i:s');
         $vendor->save(false);
 
+        // Send notification + email
+        $notification = new \humhub\modules\shop\notifications\VendorApproved([
+            'source' => $vendor,
+            'originator' => Yii::$app->user->getIdentity(),
+        ]);
+        $notification->send($vendor->user);
+
+        // Send email directly
+        try {
+            $mail = Yii::$app->mailer->compose()
+                ->setTo($vendor->user->email)
+                ->setSubject(Yii::t('ShopModule.base', 'Your shop application has been approved!'))
+                ->setHtmlBody(
+                    '<h3>' . Yii::t('ShopModule.base', 'Congratulations!') . '</h3>'
+                    . '<p>' . Yii::t('ShopModule.base', 'Your shop application "{shopName}" has been approved. You can now start adding products and selling on the platform.', ['shopName' => $vendor->shop_name]) . '</p>'
+                    . '<p><a href="' . \yii\helpers\Url::to(['/shop/vendor/status'], true) . '">' . Yii::t('ShopModule.base', 'Go to your shop') . '</a></p>'
+                );
+            $mail->send();
+        } catch (\Throwable $e) {
+            Yii::error('Vendor approval email failed: ' . $e->getMessage(), 'shop');
+        }
+
         $this->view->saved();
         return $this->redirect(['/shop/vendor/applications']);
     }
@@ -141,6 +163,29 @@ class VendorController extends Controller
         $vendor->reviewed_by = Yii::$app->user->id;
         $vendor->reviewed_at = date('Y-m-d H:i:s');
         $vendor->save(false);
+
+        // Send notification + email
+        $notification = new \humhub\modules\shop\notifications\VendorRejected([
+            'source' => $vendor,
+            'originator' => Yii::$app->user->getIdentity(),
+        ]);
+        $notification->send($vendor->user);
+
+        try {
+            $reason = $vendor->rejection_reason ? Yii::t('ShopModule.base', 'Reason: {reason}', ['reason' => $vendor->rejection_reason]) : '';
+            $mail = Yii::$app->mailer->compose()
+                ->setTo($vendor->user->email)
+                ->setSubject(Yii::t('ShopModule.base', 'Your shop application has been rejected'))
+                ->setHtmlBody(
+                    '<h3>' . Yii::t('ShopModule.base', 'Application Update') . '</h3>'
+                    . '<p>' . Yii::t('ShopModule.base', 'Your shop application "{shopName}" has been rejected.', ['shopName' => $vendor->shop_name]) . '</p>'
+                    . ($reason ? '<p>' . $reason . '</p>' : '')
+                    . '<p><a href="' . \yii\helpers\Url::to(['/shop/vendor/apply'], true) . '">' . Yii::t('ShopModule.base', 'You may reapply with updated documents.') . '</a></p>'
+                );
+            $mail->send();
+        } catch (\Throwable $e) {
+            Yii::error('Vendor rejection email failed: ' . $e->getMessage(), 'shop');
+        }
 
         $this->view->saved();
         return $this->redirect(['/shop/vendor/applications']);

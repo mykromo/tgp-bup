@@ -53,6 +53,11 @@ class Vendor extends ActiveRecord
 
     public static function getForUser(int $userId): ?self
     {
+        return static::find()->where(['user_id' => $userId])->andWhere(['!=', 'status', self::STATUS_REJECTED])->one();
+    }
+
+    public static function getForUserIncludingRejected(int $userId): ?self
+    {
         return static::findOne(['user_id' => $userId]);
     }
 
