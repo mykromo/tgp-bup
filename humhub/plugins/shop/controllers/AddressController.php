@@ -10,7 +10,11 @@ use yii\web\NotFoundHttpException;
 
 class AddressController extends Controller
 {
-    
+    public function init()
+    {
+        parent::init();
+        $this->subLayout = '@shop/views/layouts/shop';
+    }
 
     public function actionIndex()
     {

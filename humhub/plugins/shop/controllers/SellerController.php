@@ -17,7 +17,11 @@ use yii\web\UploadedFile;
 
 class SellerController extends Controller
 {
-    
+    public function init()
+    {
+        parent::init();
+        $this->subLayout = '@shop/views/layouts/shop';
+    }
 
     private function getVendor(): Vendor
     {
@@ -30,8 +34,65 @@ class SellerController extends Controller
     public function actionDashboard()
     {
         $vendor = $this->getVendor();
-        $products = Product::find()->where(['vendor_id' => $vendor->id])->orderBy(['sort_order' => SORT_ASC])->all();
+        try {
+            $products = Product::find()->where(['vendor_id' => $vendor->id])->orderBy(['sort_order' => SORT_ASC])->all();
+        } catch (\Throwable $e) {
+            $products = [];
+            Yii::error('Seller dashboard product query failed: ' . $e->getMessage(), 'shop');
+        }
         return $this->render('dashboard', ['vendor' => $vendor, 'products' => $products]);
+    }
+
+    public function actionEditStore()
+    {
+        $vendor = $this->getVendor();
+
+        if (Yii::$app->request->isPost) {
+            $vendor->shop_name = Yii::$app->request->post('shop_name', $vendor->shop_name);
+            $vendor->tagline = Yii::$app->request->post('tagline', '');
+            $vendor->description = Yii::$app->request->post('description', '');
+            $vendor->location = Yii::$app->request->post('location', '');
+
+            // Handle logo upload
+            $logo = \yii\web\UploadedFile::getInstanceByName('logo');
+            if ($logo) {
+                $path = $this->uploadStoreImage($logo, $vendor->id, 'logo');
+                if ($path) $vendor->logo_path = $path;
+            }
+
+            // Handle cover upload
+            $cover = \yii\web\UploadedFile::getInstanceByName('cover');
+            if ($cover) {
+                $path = $this->uploadStoreImage($cover, $vendor->id, 'cover');
+                if ($path) $vendor->cover_path = $path;
+            }
+
+            $vendor->save(false);
+            \humhub\modules\shop\helpers\ShopCache::invalidateVendor($vendor->id);
+            Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Store profile updated.'));
+            $this->view->saved();
+            return $this->redirect(['/shop/store/vendor-store', 'id' => $vendor->id]);
+        }
+
+        return $this->render('edit-store', ['vendor' => $vendor]);
+    }
+
+    private function uploadStoreImage($file, int $vendorId, string $type): ?string
+    {
+        if ($file->size > 2 * 1024 * 1024) return null;
+        if (!in_array(strtolower($file->extension), ['jpg', 'jpeg', 'png', 'webp'])) return null;
+
+        $uploadPath = Yii::getAlias('@webroot/uploads/shop/stores');
+        if (!is_dir($uploadPath)) mkdir($uploadPath, 0775, true);
+
+        $fileName = $vendorId . '_' . $type . '_' . time() . '.' . $file->extension;
+        $fullPath = $uploadPath . '/' . $fileName;
+
+        if ($file->saveAs($fullPath)) {
+            ProductImage::resizeImage($fullPath, $fullPath, $type === 'cover' ? 1200 : 400, $type === 'cover' ? 400 : 400);
+            return 'uploads/shop/stores/' . $fileName;
+        }
+        return null;
     }
 
     public function actionCreateProduct()
@@ -46,6 +107,7 @@ class SellerController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             $this->handleImageUploads($model);
             \humhub\modules\shop\helpers\ShopCache::invalidateProduct($model->id);
+            Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Product saved.'));
             $this->view->saved();
             return $this->redirect(['/shop/seller/dashboard']);
         }
@@ -62,11 +124,47 @@ class SellerController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             $this->handleImageUploads($model);
             \humhub\modules\shop\helpers\ShopCache::invalidateProduct($model->id);
+            Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Product updated.'));
             $this->view->saved();
             return $this->redirect(['/shop/seller/dashboard']);
         }
 
         return $this->render('product-form', ['model' => $model, 'categories' => Category::getDropdownList()]);
+    }
+
+    public function actionToggleProduct($id)
+    {
+        $vendor = $this->getVendor();
+        $this->forcePostRequest();
+        $model = Product::findOne(['id' => $id, 'vendor_id' => $vendor->id]);
+        if (!$model) throw new NotFoundHttpException();
+
+        $model->is_active = $model->is_active ? 0 : 1;
+        $model->save(false);
+        \humhub\modules\shop\helpers\ShopCache::invalidateProduct($model->id);
+        Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', $model->is_active ? 'Product enabled.' : 'Product disabled.'));
+        return $this->redirect(['/shop/seller/dashboard']);
+    }
+
+    public function actionDeleteProduct($id)
+    {
+        $vendor = $this->getVendor();
+        $this->forcePostRequest();
+        $model = Product::findOne(['id' => $id, 'vendor_id' => $vendor->id]);
+        if (!$model) throw new NotFoundHttpException();
+
+        // Delete images
+        foreach ($model->images as $img) {
+            $fullPath = Yii::getAlias('@webroot') . '/' . $img->file_path;
+            if (file_exists($fullPath)) @unlink($fullPath);
+            $img->delete();
+        }
+        // Delete variants
+        ProductVariant::deleteAll(['product_id' => $model->id]);
+        $model->delete();
+        \humhub\modules\shop\helpers\ShopCache::invalidateProduct($id);
+        Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Product deleted.'));
+        return $this->redirect(['/shop/seller/dashboard']);
     }
 
     // ── Variants ──
@@ -91,6 +189,7 @@ class SellerController extends Controller
         $model->product_id = $productId;
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Variant saved.'));
             $this->view->saved();
             return $this->redirect(['/shop/seller/variants', 'productId' => $productId]);
         }
@@ -106,6 +205,7 @@ class SellerController extends Controller
         if ($variant && $variant->product && $variant->product->vendor_id === $vendor->id) {
             $productId = $variant->product_id;
             $variant->delete();
+            Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Variant deleted.'));
             return $this->redirect(['/shop/seller/variants', 'productId' => $productId]);
         }
         return $this->redirect(['/shop/seller/dashboard']);
@@ -127,11 +227,52 @@ class SellerController extends Controller
         $model->vendor_id = $vendor->id;
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Discount created.'));
             $this->view->saved();
             return $this->redirect(['/shop/seller/discounts']);
         }
 
         return $this->render('discount-form', ['model' => $model]);
+    }
+
+    public function actionEditDiscount($id)
+    {
+        $vendor = $this->getVendor();
+        $model = Discount::findOne(['id' => $id, 'vendor_id' => $vendor->id]);
+        if (!$model) throw new NotFoundHttpException();
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Discount updated.'));
+            $this->view->saved();
+            return $this->redirect(['/shop/seller/discounts']);
+        }
+
+        return $this->render('discount-form', ['model' => $model]);
+    }
+
+    public function actionDeleteDiscount($id)
+    {
+        $vendor = $this->getVendor();
+        $this->forcePostRequest();
+        $model = Discount::findOne(['id' => $id, 'vendor_id' => $vendor->id]);
+        if ($model) {
+            $model->delete();
+            Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Discount deleted.'));
+        }
+        return $this->redirect(['/shop/seller/discounts']);
+    }
+
+    public function actionToggleDiscount($id)
+    {
+        $vendor = $this->getVendor();
+        $this->forcePostRequest();
+        $model = Discount::findOne(['id' => $id, 'vendor_id' => $vendor->id]);
+        if ($model) {
+            $model->is_active = $model->is_active ? 0 : 1;
+            $model->save(false);
+            Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', $model->is_active ? 'Discount enabled.' : 'Discount disabled.'));
+        }
+        return $this->redirect(['/shop/seller/discounts']);
     }
 
     // ── Image upload helper ──
@@ -179,11 +320,11 @@ class SellerController extends Controller
             if (file_exists($fullPath)) @unlink($fullPath);
             $productId = $img->product_id;
             $img->delete();
+            Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Image deleted.'));
             return $this->redirect(['/shop/seller/edit-product', 'id' => $productId]);
         }
         return $this->redirect(['/shop/seller/dashboard']);
     }
-}
 
     // ── Seller Order Management ──
 
@@ -233,6 +374,7 @@ class SellerController extends Controller
             '<p>Your order <strong>' . $order->order_number . '</strong> has been verified by the seller. It will be processed shortly.</p>'
         );
 
+        Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Order verified.'));
         $this->view->saved();
         return $this->redirect(['/shop/seller/view-order', 'id' => $id]);
     }
@@ -263,6 +405,7 @@ class SellerController extends Controller
             '<p>Your order <strong>' . $order->order_number . '</strong> has been rejected by the seller.</p>' . $reasonText
         );
 
+        Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Order rejected.'));
         $this->view->saved();
         return $this->redirect(['/shop/seller/orders']);
     }
@@ -344,6 +487,7 @@ class SellerController extends Controller
             '<p>Your ' . $req->type . ' request for order <strong>' . $order->order_number . '</strong> has been approved.</p>'
         );
 
+        Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Request approved.'));
         $this->view->saved();
         return $this->redirect(['/shop/seller/requests']);
     }
@@ -365,6 +509,8 @@ class SellerController extends Controller
             '<p>Your ' . $req->type . ' request for order <strong>' . $req->order->order_number . '</strong> has been rejected.</p><p>Reason: ' . \humhub\libs\Html::encode($req->seller_response) . '</p>'
         );
 
+        Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Request rejected.'));
         $this->view->saved();
         return $this->redirect(['/shop/seller/requests']);
     }
+}

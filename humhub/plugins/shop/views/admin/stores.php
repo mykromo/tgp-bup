@@ -34,6 +34,7 @@ $this->title = 'All Stores';
     <td>
         <span class="label label-<?= Vendor::getStatusBadge($v->status) ?>"><?= Vendor::getStatusLabels()[$v->status] ?? $v->status ?></span>
         <?php if ($v->disabled_reason): ?><br><small class="text-danger"><?= Html::encode($v->disabled_reason) ?></small><?php endif; ?>
+        <?php if ($v->reenable_request): ?><br><span class="label label-warning">Re-enable Requested</span><?php endif; ?>
     </td>
     <td style="white-space:nowrap"><?= Yii::$app->formatter->asDate($v->created_at) ?></td>
     <td class="text-right" style="white-space:nowrap">
@@ -45,6 +46,11 @@ $this->title = 'All Stores';
             </div>
             <?= Html::endForm() ?>
         <?php elseif ($v->status === Vendor::STATUS_SUSPENDED): ?>
+            <?php if ($v->reenable_request): ?>
+                <div style="display:inline-block;max-width:200px;font-size:11px;vertical-align:middle;margin-right:5px" class="text-info" title="<?= Html::encode($v->reenable_request) ?>">
+                    <i class="fa fa-comment"></i> "<?= Html::encode(mb_substr($v->reenable_request, 0, 50)) ?><?= mb_strlen($v->reenable_request) > 50 ? '...' : '' ?>"
+                </div>
+            <?php endif; ?>
             <a href="<?= Url::to(['/shop/admin/enable-store', 'id' => $v->id]) ?>" class="btn btn-success btn-sm" data-method="post" data-confirm="Re-enable this store?"><i class="fa fa-check"></i> Enable</a>
         <?php endif; ?>
     </td>

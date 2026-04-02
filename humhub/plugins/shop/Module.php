@@ -13,6 +13,15 @@ class Module extends BaseModule
     {
         parent::init();
         Yii::setAlias('@shop', $this->getBasePath());
+        $this->defaultRoute = 'store';
+    }
+
+    /**
+     * Returns the subLayout path for shop controllers.
+     */
+    public function getSubLayoutPath(): string
+    {
+        return '@shop/views/layouts/shop';
     }
 
     public function getName()

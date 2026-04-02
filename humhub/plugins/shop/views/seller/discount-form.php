@@ -2,7 +2,8 @@
 use humhub\libs\Html;
 use yii\bootstrap\ActiveForm;
 use yii\helpers\Url;
-$this->title = 'Create Discount Code';
+$isNew = $model->isNewRecord;
+$this->title = $isNew ? 'Create Discount Code' : 'Edit Discount Code';
 ?>
 <div class="panel panel-default">
 <div class="panel-heading"><strong><?= $this->title ?></strong></div>
@@ -17,8 +18,9 @@ $this->title = 'Create Discount Code';
     <div class="col-sm-6"><?= $form->field($model, 'starts_at')->input('datetime-local') ?></div>
     <div class="col-sm-6"><?= $form->field($model, 'expires_at')->input('datetime-local') ?></div>
 </div>
+<?= $form->field($model, 'is_active')->checkbox() ?>
 <hr>
-<?= Html::submitButton('Create Discount', ['class' => 'btn btn-primary']) ?>
+<?= Html::submitButton($isNew ? 'Create Discount' : 'Save Discount', ['class' => 'btn btn-primary']) ?>
 <a href="<?= Url::to(['/shop/seller/discounts']) ?>" class="btn btn-default">Cancel</a>
 <?php ActiveForm::end(); ?>
 </div></div>

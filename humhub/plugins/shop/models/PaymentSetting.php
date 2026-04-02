@@ -12,7 +12,6 @@ class PaymentSetting extends ActiveRecord
     public function rules()
     {
         return [
-            [['space_id'], 'required'],
             [['space_id'], 'integer'],
             [['payment_instructions'], 'string'],
             [['accepted_methods'], 'string', 'max' => 500],

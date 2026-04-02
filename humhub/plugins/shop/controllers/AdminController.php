@@ -15,7 +15,11 @@ use yii\web\UploadedFile;
 
 class AdminController extends Controller
 {
-    
+    public function init()
+    {
+        parent::init();
+        $this->subLayout = '@shop/views/layouts/shop';
+    }
 
     private function requireAdmin()
     {
@@ -41,6 +45,7 @@ class AdminController extends Controller
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             $this->handleImageUploads($model);
+            Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Product saved.'));
             $this->view->saved();
             return $this->redirect(['/shop/admin/products']);
         }
@@ -55,6 +60,7 @@ class AdminController extends Controller
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             $this->handleImageUploads($model);
+            Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Product updated.'));
             $this->view->saved();
             return $this->redirect(['/shop/admin/products']);
         }
@@ -71,6 +77,7 @@ class AdminController extends Controller
             if (file_exists($fullPath)) @unlink($fullPath);
             $productId = $img->product_id;
             $img->delete();
+            Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Image deleted.'));
             return $this->redirect(['/shop/admin/edit-product', 'id' => $productId]);
         }
         return $this->redirect(['/shop/admin/products']);
@@ -146,6 +153,7 @@ class AdminController extends Controller
         $order->verified_at = date('Y-m-d H:i:s');
         $order->save(false);
 
+        Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Order verified.'));
         $this->view->saved();
         return $this->redirect(['/shop/admin/view-order', 'id' => $id]);
     }
@@ -166,6 +174,7 @@ class AdminController extends Controller
             }
         }
 
+        Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Order cancelled.'));
         $this->view->saved();
         return $this->redirect(['/shop/admin/orders']);
     }
@@ -180,6 +189,7 @@ class AdminController extends Controller
             $cacheTtl = max(0, min(86400, (int) Yii::$app->request->post('cacheTtl', 300)));
             Yii::$app->getModule('shop')->settings->set('cacheTtl', $cacheTtl);
             \humhub\modules\shop\helpers\ShopCache::flushAll();
+            Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Settings saved.'));
             $this->view->saved();
             return $this->redirect(['/shop/admin/settings']);
         }
@@ -225,6 +235,7 @@ class AdminController extends Controller
             . ($vendor->disabled_reason ? '<p>Reason: ' . \humhub\libs\Html::encode($vendor->disabled_reason) . '</p>' : '')
         );
 
+        Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Store disabled.'));
         $this->view->saved();
         return $this->redirect(['/shop/admin/stores']);
     }
@@ -240,6 +251,8 @@ class AdminController extends Controller
         $vendor->disabled_reason = null;
         $vendor->disabled_at = null;
         $vendor->disabled_by = null;
+        $vendor->reenable_request = null;
+        $vendor->reenable_requested_at = null;
         $vendor->save(false);
 
         \humhub\modules\shop\helpers\ShopNotify::sendEmail(
@@ -248,6 +261,7 @@ class AdminController extends Controller
             '<p>Your shop <strong>' . \humhub\libs\Html::encode($vendor->shop_name) . '</strong> has been re-enabled. You can now continue selling.</p>'
         );
 
+        Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Store enabled.'));
         $this->view->saved();
         return $this->redirect(['/shop/admin/stores']);
     }

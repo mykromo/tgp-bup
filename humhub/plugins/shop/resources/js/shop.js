@@ -33,6 +33,43 @@
     setTimeout(lazyLoad, 300);
 })();
 
+// Countdown timers for sale expiration
+(function () {
+    function updateCountdowns() {
+        var els = document.querySelectorAll('.shop-countdown[data-expires]');
+        els.forEach(function (el) {
+            var expires = parseInt(el.getAttribute('data-expires'), 10) * 1000;
+            var now = Date.now();
+            var diff = expires - now;
+            var textEl = el.querySelector('.shop-timer-text');
+            if (!textEl) return;
+            if (diff <= 0) {
+                textEl.textContent = 'Sale ended';
+                el.classList.add('shop-countdown-ended');
+                return;
+            }
+            var d = Math.floor(diff / 86400000);
+            var h = Math.floor((diff % 86400000) / 3600000);
+            var m = Math.floor((diff % 3600000) / 60000);
+            var s = Math.floor((diff % 60000) / 1000);
+            var parts = [];
+            if (d > 0) parts.push(d + 'd');
+            if (h > 0) parts.push(h + 'h');
+            parts.push(m + 'm');
+            parts.push(s + 's');
+            textEl.textContent = parts.join(' ') + ' left';
+        });
+    }
+
+    updateCountdowns();
+    setInterval(updateCountdowns, 1000);
+
+    // Re-init after PJAX
+    if (typeof jQuery !== 'undefined') {
+        jQuery(document).on('humhub:ready humhub:modules:content:afterLoad', updateCountdowns);
+    }
+})();
+
 // Wishlist toggle via AJAX
 (function () {
     if (typeof jQuery === 'undefined') return;

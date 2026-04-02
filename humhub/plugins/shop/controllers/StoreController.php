@@ -17,7 +17,11 @@ use yii\web\NotFoundHttpException;
 
 class StoreController extends Controller
 {
-    
+    public function init()
+    {
+        parent::init();
+        $this->subLayout = '@shop/views/layouts/shop';
+    }
 
     public function actionIndex()
     {
@@ -79,8 +83,20 @@ class StoreController extends Controller
             return $this->redirect(Yii::$app->user->loginUrl);
         }
 
+        // Administrators cannot buy — they are purely for managing stores
+        if (Yii::$app->user->isAdmin()) {
+            Yii::$app->session->setFlash('error', Yii::t('ShopModule.base', 'Administrators cannot purchase items. Admin accounts are for store management only.'));
+            return $this->redirect(['/shop/store/view', 'id' => $id]);
+        }
+
         $product = Product::findOne(['id' => $id, 'is_active' => 1]);
         if (!$product || !$product->isInStock()) throw new NotFoundHttpException();
+
+        // Block purchases from suspended vendors
+        if ($product->vendor && $product->vendor->status === Vendor::STATUS_SUSPENDED) {
+            Yii::$app->session->setFlash('error', Yii::t('ShopModule.base', 'This store is currently suspended. Purchasing is unavailable.'));
+            return $this->redirect(['/shop/store/view', 'id' => $id]);
+        }
 
         $settings = PaymentSetting::getGlobal();
         $user = Yii::$app->user->getIdentity();
@@ -166,6 +182,10 @@ class StoreController extends Controller
     public function actionEditOrder($id)
     {
         if (Yii::$app->user->isGuest) return $this->redirect(Yii::$app->user->loginUrl);
+        if (Yii::$app->user->isAdmin()) {
+            Yii::$app->session->setFlash('error', Yii::t('ShopModule.base', 'Administrators cannot place or manage orders.'));
+            return $this->redirect(['/shop/store/index']);
+        }
         $order = Order::findOne(['id' => $id, 'user_id' => Yii::$app->user->id]);
         if (!$order) throw new NotFoundHttpException();
 
@@ -209,6 +229,7 @@ class StoreController extends Controller
                 '<p>The buyer has updated order <strong>' . $order->order_number . '</strong>.</p>'
             );
 
+            Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Order updated.'));
             $this->view->saved();
             return $this->redirect(['/shop/store/my-orders']);
         }
@@ -222,6 +243,10 @@ class StoreController extends Controller
     public function actionCancelOrder($id)
     {
         if (Yii::$app->user->isGuest) return $this->redirect(Yii::$app->user->loginUrl);
+        if (Yii::$app->user->isAdmin()) {
+            Yii::$app->session->setFlash('error', Yii::t('ShopModule.base', 'Administrators cannot place or manage orders.'));
+            return $this->redirect(['/shop/store/index']);
+        }
         $this->forcePostRequest();
         $order = Order::findOne(['id' => $id, 'user_id' => Yii::$app->user->id]);
         if (!$order) throw new NotFoundHttpException();
@@ -245,6 +270,7 @@ class StoreController extends Controller
             '<p>The buyer has cancelled order <strong>' . $order->order_number . '</strong>.</p>'
         );
 
+        Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Order cancelled.'));
         $this->view->saved();
         return $this->redirect(['/shop/store/my-orders']);
     }
@@ -255,6 +281,10 @@ class StoreController extends Controller
     public function actionRequestChange($id)
     {
         if (Yii::$app->user->isGuest) return $this->redirect(Yii::$app->user->loginUrl);
+        if (Yii::$app->user->isAdmin()) {
+            Yii::$app->session->setFlash('error', Yii::t('ShopModule.base', 'Administrators cannot place or manage orders.'));
+            return $this->redirect(['/shop/store/index']);
+        }
         $order = Order::findOne(['id' => $id, 'user_id' => Yii::$app->user->id]);
         if (!$order) throw new NotFoundHttpException();
 
@@ -279,6 +309,7 @@ class StoreController extends Controller
                 '<p>The buyer has requested a ' . $req->type . ' for order <strong>' . $order->order_number . '</strong>.</p><p>' . \humhub\libs\Html::encode($req->details) . '</p>'
             );
 
+            Yii::$app->session->setFlash('success', Yii::t('ShopModule.base', 'Request submitted.'));
             $this->view->saved();
             return $this->redirect(['/shop/store/my-orders']);
         }
@@ -334,9 +365,45 @@ class StoreController extends Controller
         $vendor = \humhub\modules\shop\helpers\ShopCache::getVendor($id);
         if (!$vendor) throw new NotFoundHttpException();
 
-        $products = Product::find()->where(['vendor_id' => $vendor->id, 'is_active' => 1])->orderBy(['sort_order' => SORT_ASC])->all();
+        $tab = Yii::$app->request->get('tab', 'all');
+        $categoryFilter = Yii::$app->request->get('category');
+        $sort = Yii::$app->request->get('sort', 'default');
+        $keyword = Yii::$app->request->get('q');
         $isFavorited = !Yii::$app->user->isGuest ? FavoriteStore::isFavorited(Yii::$app->user->id, $vendor->id) : false;
 
-        return $this->render('vendor-store', ['vendor' => $vendor, 'products' => $products, 'isFavorited' => $isFavorited]);
+        $productQuery = Product::find()->where(['vendor_id' => $vendor->id, 'is_active' => 1]);
+
+        if ($tab === 'sale') {
+            $productQuery->andWhere(['not', ['sale_price' => null]])
+                ->andWhere(['<', 'sale_price', new \yii\db\Expression('price')]);
+        }
+        if ($categoryFilter) {
+            $productQuery->andWhere(['category_id' => $categoryFilter]);
+        }
+        if ($keyword) {
+            $productQuery->andWhere(['or', ['like', 'name', $keyword], ['like', 'description', $keyword]]);
+        }
+
+        switch ($sort) {
+            case 'price_asc': $productQuery->orderBy(['price' => SORT_ASC]); break;
+            case 'price_desc': $productQuery->orderBy(['price' => SORT_DESC]); break;
+            case 'newest': $productQuery->orderBy(['created_at' => SORT_DESC]); break;
+            case 'name': $productQuery->orderBy(['name' => SORT_ASC]); break;
+            default: $productQuery->orderBy(['sort_order' => SORT_ASC]); break;
+        }
+
+        $products = $productQuery->all();
+        $categories = Category::find()->where(['is_active' => 1])->orderBy(['sort_order' => SORT_ASC])->all();
+
+        return $this->render('vendor-store', [
+            'vendor' => $vendor,
+            'products' => $products,
+            'categories' => $categories,
+            'activeTab' => $tab,
+            'isFavorited' => $isFavorited,
+            'sort' => $sort,
+            'keyword' => $keyword,
+            'categoryFilter' => $categoryFilter,
+        ]);
     }
 }

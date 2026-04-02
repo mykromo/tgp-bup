@@ -7,6 +7,7 @@ $this->title = Html::encode($product->name);
 $images = $product->images;
 $uid = Yii::$app->user->isGuest ? 0 : Yii::$app->user->id;
 $wishlisted = $uid ? Wishlist::isWishlisted($uid, $product->id) : false;
+$vendorSuspended = $product->vendor && $product->vendor->status === \humhub\modules\shop\models\Vendor::STATUS_SUSPENDED;
 ?>
 <div class="panel panel-default">
 <div class="panel-heading">
@@ -59,6 +60,15 @@ function shopSlide(d){shopGoTo(shopIdx+d);}
 
     <div class="shop-price" style="font-size:24px;margin:15px 0"><?= $product->formatPrice() ?></div>
 
+    <?php
+    $saleEnds = $product->isOnSale() && $product->sale_end ? strtotime($product->sale_end) : null;
+    if ($saleEnds && $saleEnds > time()):
+    ?>
+    <div class="shop-countdown" data-expires="<?= $saleEnds ?>" style="font-size:14px;margin-bottom:10px">
+        <i class="fa fa-clock-o"></i> Sale ends in <span class="shop-timer-text" style="font-weight:700"></span>
+    </div>
+    <?php endif; ?>
+
     <?php if ($product->stock !== null): ?><p class="text-muted"><?= $product->stock ?> in stock</p><?php endif; ?>
 
     <?php if (!empty($product->variants)): ?>
@@ -72,7 +82,11 @@ function shopSlide(d){shopGoTo(shopIdx+d);}
 
     <p style="margin-top:15px"><?= nl2br(Html::encode($product->description)) ?></p>
 
-    <?php if ($product->isInStock()): ?>
+    <?php if ($vendorSuspended): ?>
+        <div class="alert alert-warning"><i class="fa fa-exclamation-triangle"></i> <?= Yii::t('ShopModule.base', 'This store is currently suspended. Orders are on hold and purchasing is temporarily unavailable.') ?></div>
+    <?php elseif (!Yii::$app->user->isGuest && Yii::$app->user->isAdmin()): ?>
+        <div class="alert alert-info"><i class="fa fa-info-circle"></i> <?= Yii::t('ShopModule.base', 'Administrators cannot purchase items. Admin accounts are for store management only.') ?></div>
+    <?php elseif ($product->isInStock()): ?>
         <a href="<?= Url::to(['/shop/store/buy', 'id' => $product->id]) ?>" class="btn btn-success btn-lg"><i class="fa fa-shopping-cart"></i> Buy Now</a>
     <?php else: ?>
         <span class="label label-danger" style="font-size:14px">Out of Stock</span>
